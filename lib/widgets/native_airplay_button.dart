@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
@@ -18,7 +18,7 @@ class NativeAudioSelector extends StatelessWidget {
     final Widget buttonContent = fallbackChild ?? const Icon(LucideIcons.speaker, color: Colors.white, size: 18);
     
     // Use true native AVRoutePickerView on iOS via PlatformView
-    if (Platform.isIOS) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       return SizedBox(
         width: 40,
         height: 40,
@@ -47,6 +47,10 @@ class NativeAudioSelector extends StatelessWidget {
     
     // Fallback to output_route_selector on Android (which correctly shows MediaRouter dialog)
     // or if we're on another platform
+    if (kIsWeb) {
+      return const SizedBox.shrink();
+    }
+    
     return AudioOutputSelector(
       child: SizedBox(
         width: 40,

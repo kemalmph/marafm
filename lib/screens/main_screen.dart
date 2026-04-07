@@ -149,7 +149,7 @@ class _MainScreenState extends State<MainScreen> {
                     _buildPlaybackButton(
                       context: context,
                       icon: LucideIcons.play,
-                      isActive: state.isPlaying || state.isLoading,
+                      isActive: state.isPlaying || (state.isLoading && !state.isPaused),
                       activeColor: AppTheme.accentOrange,
                       onTap: () => context.read<PlaybackBloc>().add(PlayRequested()),
                     ),

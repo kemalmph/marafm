@@ -35,6 +35,17 @@ class MaraFMApp extends StatelessWidget {
       title: 'Mara FM',
       theme: AppTheme.theme,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return Container(
+          color: Colors.black, // Add a background color for the margins
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: child!,
+            ),
+          ),
+        );
+      },
       home: const MainScreen(),
     );
   }

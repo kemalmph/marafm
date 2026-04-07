@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart'; // Added to support kIsWeb
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:audio_service/audio_service.dart' as audio;
 import 'package:equatable/equatable.dart';
@@ -143,7 +144,7 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
           album: 'Radio',
           title: title,
           artist: artist,
-          artUri: Uri.parse('https://marafm.com/logo.png'), 
+          artUri: kIsWeb ? null : Uri.parse('https://marafm.com/logo.png'), 
         ));
       } else {
         // Fallback: clear the metadata
@@ -161,7 +162,7 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
           album: 'Radio',
           title: state.currentChannel.name,
           artist: 'Live Stream',
-          artUri: Uri.parse('https://marafm.com/logo.png'), 
+          artUri: kIsWeb ? null : Uri.parse('https://marafm.com/logo.png'), 
         ));
       }
     });
@@ -170,13 +171,14 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
       final isBuffering = event.state.processingState == audio.AudioProcessingState.buffering || 
                           event.state.processingState == audio.AudioProcessingState.loading;
       final isError = event.state.processingState == audio.AudioProcessingState.error;
+      final isPlaying = event.state.playing;
       
       emit(state.copyWith(
-        isPlaying: event.state.playing,
-        isPaused: !event.state.playing && 
+        isPlaying: isPlaying,
+        isPaused: !isPlaying && 
                   event.state.processingState != audio.AudioProcessingState.idle && 
-                  !isBuffering && !isError,
-        isLoading: isBuffering,
+                  !isError,
+        isLoading: isPlaying && isBuffering,
       ));
     });
 
@@ -257,7 +259,7 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
         album: 'Radio',
         title: currentChannel.name,
         artist: 'Live Stream',
-        artUri: Uri.parse('https://marafm.com/logo.png'), 
+        artUri: kIsWeb ? null : Uri.parse('https://marafm.com/logo.png'), 
       ));
       return;
     }
@@ -276,7 +278,7 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
           album: currentChannel.name,
           title: metadata.title,
           artist: metadata.artist,
-          artUri: metadata.artUrl.isNotEmpty ? Uri.parse(metadata.artUrl) : Uri.parse('https://marafm.com/logo.png'), 
+          artUri: kIsWeb ? null : (metadata.artUrl.isNotEmpty ? Uri.parse(metadata.artUrl) : Uri.parse('https://marafm.com/logo.png')), 
         ));
       }
     } catch (e) {

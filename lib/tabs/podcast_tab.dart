@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../theme/app_theme.dart';
 import '../models/youtube_video.dart';
@@ -136,7 +137,7 @@ class _PodcastTabState extends State<PodcastTab> {
                   fit: StackFit.expand,
                   children: [
                     Image.network(
-                      video.thumbnailUrl,
+                      kIsWeb ? 'https://wsrv.nl/?url=${Uri.encodeComponent(video.thumbnailUrl)}' : video.thumbnailUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
                         color: Colors.black,

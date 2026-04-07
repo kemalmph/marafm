@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../theme/app_theme.dart';
@@ -134,7 +135,7 @@ class _NewsTabState extends State<NewsTab> {
                 child: Container(
                   color: Colors.black,
                   child: Image.network(
-                    item.imageUrl,
+                    kIsWeb ? 'https://wsrv.nl/?url=${Uri.encodeComponent(item.imageUrl)}' : item.imageUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       color: Colors.black,

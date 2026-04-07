@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'; // Added
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -124,7 +125,7 @@ class _PlayerTabState extends State<PlayerTab> {
                         0,      0,      0,      1, 0,
                       ]),
                 child: Image.network(
-                  artUrl,
+                  kIsWeb ? 'https://wsrv.nl/?url=${Uri.encodeComponent(artUrl)}' : artUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(color: Colors.black),
                 ),
@@ -333,10 +334,7 @@ class _PlayerTabState extends State<PlayerTab> {
     String mainText;
     String subText;
 
-    if (isLoading) {
-      mainText = 'LOADING AUDIO...';
-      subText = 'PLEASE WAIT';
-    } else if (isPlaying) {
+    if (isPlaying) {
       if (hasMetadata && title != null && title.isNotEmpty) {
         mainText = title.toUpperCase();
         subText = (artist ?? '').toUpperCase();
@@ -344,6 +342,17 @@ class _PlayerTabState extends State<PlayerTab> {
         mainText = 'PLAYING STREAM...';
         subText = state.currentChannel.name.toUpperCase();
       }
+    } else if (state.isPaused) {
+      if (hasMetadata && title != null && title.isNotEmpty) {
+        mainText = title.toUpperCase();
+        subText = (artist ?? '').toUpperCase();
+      } else {
+        mainText = 'PAUSED';
+        subText = state.currentChannel.name.toUpperCase();
+      }
+    } else if (isLoading) {
+      mainText = 'LOADING AUDIO...';
+      subText = 'PLEASE WAIT';
     } else {
       if (hasMetadata && title != null && title.isNotEmpty) {
         mainText = title.toUpperCase();
@@ -499,7 +508,7 @@ class _PlayerTabState extends State<PlayerTab> {
                               ),
                               child: item.artUrl.isNotEmpty 
                                 ? Image.network(
-                                    item.artUrl, 
+                                    kIsWeb ? 'https://wsrv.nl/?url=${Uri.encodeComponent(item.artUrl)}' : item.artUrl, 
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) => Container(
                                       color: Colors.black,

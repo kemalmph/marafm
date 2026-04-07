@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
@@ -57,6 +58,11 @@ class _LikedSongsModalState extends State<LikedSongsModal> {
     }
 
     try {
+      if (kIsWeb) {
+        await Share.share(buffer.toString(), subject: 'My Liked Songs on Mara FM');
+        return;
+      }
+
       final directory = await getTemporaryDirectory();
       final String fileName = 'My Liked Songs on Mara FM.txt';
       final File file = File('${directory.path}/$fileName');

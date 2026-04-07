@@ -17,7 +17,7 @@ class RadioChannel {
 
   static const RadioChannel maraFM = RadioChannel(
     name: 'MARA FM',
-    streamUrl: 'https://s1.gntr.net/public/marafm',
+    streamUrl: 'https://s1.gntr.net/listen/marafm/marafm',
     metadataUrl: 'https://s1.gntr.net/api/nowplaying/marafm',
     genre: 'Pop, Rock, Soul',
     description: 'Bandung\'s go-to station for the best in Contemporary Hit Radio, both International and Indonesian songs. Mara FM spins a carefully curated mix of today\'s hottest tracks alongside timeless hits spanning from the 80s to now.',

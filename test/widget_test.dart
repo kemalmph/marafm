@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:audio_service/audio_service.dart';
-import 'package:mara_fm_2/main.dart';
+import 'package:mara_fm/main.dart';
 
 class MockAudioHandler extends BaseAudioHandler {}
 

@@ -1,15 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import './theme/app_theme.dart';
 import './screens/main_screen.dart';
 import './services/audio_handler.dart';
+import './services/config_service.dart';
+import './bloc/config_bloc.dart';
+import './bloc/auth_bloc.dart';
 
 late AudioHandler _audioHandler;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // Load environment variables
+  await dotenv.load(fileName: '.env');
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+  );
+
   // Configure audio session
   final session = await AudioSession.instance;
   await session.configure(const AudioSessionConfiguration.music());
@@ -31,10 +46,15 @@ class MaraFMApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mara FM',
-      theme: AppTheme.theme,
-      debugShowCheckedModeBanner: false,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => ConfigBloc(ConfigService())..add(LoadConfigRequested())),
+        BlocProvider(create: (context) => AuthBloc()),
+      ],
+      child: MaterialApp(
+        title: 'Mara FM',
+        theme: AppTheme.theme,
+        debugShowCheckedModeBanner: false,
       builder: (context, child) {
         return Container(
           color: Colors.black, // Add a background color for the margins
@@ -47,7 +67,7 @@ class MaraFMApp extends StatelessWidget {
         );
       },
       home: const MainScreen(),
-    );
+    ));
   }
 }
 

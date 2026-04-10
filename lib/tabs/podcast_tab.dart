@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../bloc/config_bloc.dart';
 import '../theme/app_theme.dart';
 import '../models/youtube_video.dart';
 import '../services/youtube_service.dart';
@@ -14,10 +16,8 @@ class PodcastTab extends StatefulWidget {
 }
 
 class _PodcastTabState extends State<PodcastTab> {
-  final YouTubeService _youtubeService = YouTubeService(
-    apiKey: 'AIzaSyAhnU8eT-ig6z5GDUsGAZLLRKG2AcDEawM',
-  );
-  final String _playlistId = 'PL0D016RZTNd9Gbr8Ma96MdrqoD0KwVYLq';
+  YouTubeService? _youtubeService;
+  String? _playlistId;
   
   List<YouTubeVideo>? _videos;
   bool _isLoading = true;
@@ -26,12 +26,19 @@ class _PodcastTabState extends State<PodcastTab> {
   @override
   void initState() {
     super.initState();
+    final config = context.read<ConfigBloc>().state.config;
+    _youtubeService = YouTubeService(apiKey: config.youtubeApiKey);
+    _playlistId = config.youtubePlaylistId;
     _fetchPodcasts();
   }
 
   Future<void> _fetchPodcasts() async {
+    if (_youtubeService == null || _playlistId == null || _playlistId!.isEmpty) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
     try {
-      final videos = await _youtubeService.fetchPlaylistVideos(_playlistId);
+      final videos = await _youtubeService!.fetchPlaylistVideos(_playlistId!);
       if (mounted) {
         setState(() {
           _videos = videos;

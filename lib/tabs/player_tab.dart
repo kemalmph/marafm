@@ -7,11 +7,11 @@ import 'package:marquee/marquee.dart';
 import '../theme/app_theme.dart';
 import '../bloc/playback_bloc.dart';
 import '../models/station_metadata.dart';
-import '../models/radio_channel.dart';
 import '../modals/share_modal.dart';
-import '../modals/liked_songs_modal.dart';
 import '../widgets/tactile_container.dart';
 import '../services/liked_songs_service.dart';
+import '../bloc/config_bloc.dart';
+import '../bloc/auth_bloc.dart';
 
 class PlayerTab extends StatefulWidget {
   const PlayerTab({super.key});
@@ -39,6 +39,10 @@ class _PlayerTabState extends State<PlayerTab> {
 
   void _toggleLike(StationMetadata? metadata) async {
     if (metadata == null) return;
+    if (context.read<AuthBloc>().state is! AuthAuthenticated) {
+      _showSnackBar('LOGIN TO LIKE A SONG');
+      return;
+    }
     if (_isLiked) {
       await _likedSongsService.removeLikedSong(metadata.title, metadata.artist);
     } else {
@@ -49,18 +53,44 @@ class _PlayerTabState extends State<PlayerTab> {
     }
   }
 
-  void _showLikedSongsModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const LikedSongsModal(),
-    ).then((_) {
-      // Re-check status in case it was removed from the list
-      final state = context.read<PlaybackBloc>().state;
-      _checkLikedStatus(state.metadata);
+  void _showSnackBar(String message) {
+    _showSnackBarWithContext(context, message);
+  }
+
+  void _showSnackBarWithContext(BuildContext ctx, String message) {
+    final overlay = Overlay.of(ctx, rootOverlay: true);
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => GestureDetector(
+        onTap: () => entry.remove(),
+        child: Container(
+          color: Colors.black.withValues(alpha: 0.6),
+          child: Center(
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 32),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: AppTheme.accentOrange,
+                  border: Border.all(color: AppTheme.shadowOrange, width: 4),
+                  boxShadow: const [BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0)],
+                ),
+                child: Text(message,
+                    style: AppTheme.retroStyle(fontSize: 12, color: Colors.white),
+                    textAlign: TextAlign.center),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    overlay.insert(entry);
+    Future.delayed(const Duration(seconds: 3), () {
+      if (entry.mounted) entry.remove();
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -199,6 +229,7 @@ class _PlayerTabState extends State<PlayerTab> {
   void _showChannelSelectionModal(BuildContext context) {
     // Capture the bloc before opening the modal
     final bloc = context.read<PlaybackBloc>();
+    final outerContext = context; // capture for snackbar
     
     showModalBottomSheet(
       context: context,
@@ -207,79 +238,101 @@ class _PlayerTabState extends State<PlayerTab> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
       ),
-      builder: (context) => Container(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: AppTheme.borderGrey, width: 8)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: AppTheme.cardGrey,
-              child: Text(
-                'SELECT CHANNEL',
-                style: AppTheme.retroStyle(fontSize: 16, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold),
-              ),
+      builder: (context) => BlocBuilder<ConfigBloc, ConfigState>(
+        builder: (context, configState) {
+          final channels = configState.config.channels;
+          return Container(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: AppTheme.borderGrey, width: 8)),
             ),
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.6,
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: RadioChannel.all.map((channel) {
-                    final isCurrent = bloc.state.currentChannel == channel;
-                    final isLast = RadioChannel.all.last == channel;
-
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-                      child: TactileContainer(
-                        onTap: () {
-                          bloc.add(ChannelSelected(channel));
-                          Navigator.pop(context);
-                        },
-                        builder: (context, isPressed) => Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: AppTheme.controlButtonDecoration(
-                            color: isCurrent ? AppTheme.primaryTeal : AppTheme.cardGrey,
-                            isPressed: isPressed,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isCurrent ? LucideIcons.radio : LucideIcons.circle,
-                                color: isCurrent ? Colors.white : AppTheme.borderGrey,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  channel.name.toUpperCase(),
-                                  style: AppTheme.retroStyle(
-                                    fontSize: 14,
-                                    color: isCurrent ? Colors.white : Colors.white70,
-                                    fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                                  ),
-                                ),
-                              ),
-                              if (isCurrent)
-                                const Icon(LucideIcons.check, color: Colors.white, size: 16),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: AppTheme.cardGrey,
+                  child: Text(
+                    'SELECT CHANNEL',
+                    style: AppTheme.retroStyle(fontSize: 16, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.6,
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: channels.map((channel) {
+                        final isCurrent = bloc.state.currentChannel == channel;
+                        final isLast = channels.last == channel;
+                        final authState = outerContext.read<AuthBloc>().state;
+                        final isLocked = channel.name != 'MARA FM' && authState is! AuthAuthenticated;
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
+                          child: TactileContainer(
+                            onTap: () {
+                              if (isLocked) {
+                                Navigator.pop(context);
+                                _showSnackBarWithContext(outerContext, 'LOG IN TO ACCESS OTHER CHANNELS');
+                                return;
+                              }
+                              bloc.add(ChannelSelected(channel));
+                              Navigator.pop(context);
+                            },
+                            builder: (context, isPressed) => Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: AppTheme.controlButtonDecoration(
+                                color: isLocked
+                                    ? Colors.black
+                                    : isCurrent ? AppTheme.primaryTeal : AppTheme.cardGrey,
+                                isPressed: isLocked ? false : isPressed,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isLocked
+                                        ? LucideIcons.lock
+                                        : isCurrent ? LucideIcons.radio : LucideIcons.circle,
+                                    color: isLocked
+                                        ? Colors.grey.shade700
+                                        : isCurrent ? Colors.white : AppTheme.borderGrey,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      channel.name.toUpperCase(),
+                                      style: AppTheme.retroStyle(
+                                        fontSize: 14,
+                                        color: isLocked
+                                            ? Colors.grey.shade600
+                                            : isCurrent ? Colors.white : Colors.white70,
+                                        fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ),
+                                  if (isCurrent && !isLocked)
+                                    const Icon(LucideIcons.check, color: Colors.white, size: 16),
+                                  if (isLocked)
+                                    const Icon(LucideIcons.lock, color: AppTheme.borderGrey, size: 14),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -436,6 +489,16 @@ class _PlayerTabState extends State<PlayerTab> {
           icon: LucideIcons.messageSquare,
           color: AppTheme.accentOrange,
           onTap: () async {
+            final authState = context.read<AuthBloc>().state;
+            if (authState is! AuthAuthenticated) {
+              _showSnackBar('LOGIN TO MESSAGE STUDIO AND REGISTER YOUR WHATSAPP NUMBER');
+              return;
+            }
+            final whatsapp = authState.profile?['whatsapp_number'] as String? ?? '';
+            if (whatsapp.isEmpty) {
+              _showSnackBar('REGISTER YOUR WHATSAPP NUMBER TO MESSAGE STUDIO');
+              return;
+            }
             final Uri whatsappUri = Uri.parse('https://wa.me/6285111441067');
             if (await canLaunchUrl(whatsappUri)) {
               await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);

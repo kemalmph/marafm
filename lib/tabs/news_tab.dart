@@ -27,7 +27,7 @@ class _NewsTabState extends State<NewsTab> {
 
   Future<void> _fetchNews() async {
     try {
-      final items = await _newsService.fetchNews();
+      final items = await _newsService.fetchNewsFromSupabase();
       if (mounted) {
         setState(() {
           _newsItems = items;
@@ -102,8 +102,25 @@ class _NewsTabState extends State<NewsTab> {
           style: AppTheme.retroStyle(fontSize: 12, color: Colors.white),
         ),
         const SizedBox(height: 16),
-        if (_newsItems != null)
+        if (_newsItems == null || _newsItems!.isEmpty)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 100),
+              child: Column(
+                children: [
+                  const Icon(LucideIcons.newspaper, color: AppTheme.primaryTeal, size: 48),
+                  const SizedBox(height: 16),
+                  Text(
+                    'NO NEWS YET',
+                    style: AppTheme.retroStyle(fontSize: 14, color: AppTheme.primaryTeal),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
           ..._newsItems!.map((item) => _buildPostCard(item)),
+
         const SizedBox(height: 80), // Padding for footer
       ],
     );

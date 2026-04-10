@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tactile_container.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ShareModal extends StatefulWidget {
   final String songTitle;
@@ -31,6 +33,13 @@ class _ShareModalState extends State<ShareModal> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _shareToUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   @override
@@ -115,25 +124,32 @@ class _ShareModalState extends State<ShareModal> {
                 _buildSmallShareButton(
                   icon: LucideIcons.twitter,
                   color: const Color(0xFF1DA1F2),
-                  onTap: () {},
+                  onTap: () => _shareToUrl(
+                    'https://twitter.com/intent/tweet?text=${Uri.encodeComponent(_controller.text)}',
+                  ),
                 ),
                 const SizedBox(width: 8),
+                // Instagram — no deep link for text, use native share sheet
                 _buildSmallShareButton(
                   icon: LucideIcons.instagram,
                   color: const Color(0xFFE1306C),
-                  onTap: () {},
+                  onTap: () => Share.share(_controller.text),
                 ),
                 const SizedBox(width: 8),
+                // Facebook
                 _buildSmallShareButton(
                   icon: LucideIcons.facebook,
                   color: const Color(0xFF4267B2),
-                  onTap: () {},
+                  onTap: () => _shareToUrl(
+                    'https://www.facebook.com/sharer/sharer.php?quote=${Uri.encodeComponent(_controller.text)}&u=${Uri.encodeComponent('https://mara.fm')}',
+                  ),
                 ),
                 const SizedBox(width: 8),
+                // Native share sheet
                 _buildSmallShareButton(
                   icon: LucideIcons.share2,
                   color: AppTheme.primaryTeal,
-                  onTap: () {},
+                  onTap: () => Share.share(_controller.text),
                 ),
               ],
             ),

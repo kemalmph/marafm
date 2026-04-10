@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_theme.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/config_bloc.dart';
 import '../bloc/playback_bloc.dart';
 import '../tabs/player_tab.dart';
 import '../tabs/on_air_tab.dart';
@@ -92,11 +94,19 @@ class _MainScreenState extends State<MainScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildArcadeHeaderButton(LucideIcons.user, () {
+              final authBloc = context.read<AuthBloc>();
+              final configBloc = context.read<ConfigBloc>();
               showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
-                builder: (context) => const SettingsModal(),
+                builder: (modalContext) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: authBloc),
+                    BlocProvider.value(value: configBloc),
+                  ],
+                  child: const SettingsModal(),
+                ),
               );
             }),
             Column(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import './theme/app_theme.dart';
 import './screens/main_screen.dart';
@@ -13,16 +12,16 @@ import './bloc/auth_bloc.dart';
 
 late AudioHandler _audioHandler;
 
+const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
-  await dotenv.load(fileName: '.env');
-
-  // Initialize Supabase
+  // Initialize Supabase using dart-define env vars
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    url: _supabaseUrl,
+    anonKey: _supabaseAnonKey,
   );
 
   // Configure audio session

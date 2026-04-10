@@ -94,6 +94,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } on AuthException catch (e) {
       if (e.statusCode == '429') {
         emit(AuthError('Too many attempts. Please wait a moment and try again.'));
+      } else if (e.message.toLowerCase().contains('invalid') || e.message.toLowerCase().contains('credentials')) {
+        emit(AuthError('Wrong email or password.'));
       } else {
         emit(AuthError(e.message));
       }

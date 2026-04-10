@@ -7,6 +7,7 @@ class AppConfig {
   final List<Program> programs;
   final Map<String, String> appInfo;
   final Map<String, String> stationInfo;
+  final Map<String, String> contactInfo;
   final String youtubeApiKey;
   final String youtubePlaylistId;
 
@@ -15,6 +16,7 @@ class AppConfig {
     required this.programs,
     required this.appInfo,
     required this.stationInfo,
+    this.contactInfo = const {},
     this.youtubeApiKey = '',
     this.youtubePlaylistId = '',
   });
@@ -140,6 +142,13 @@ class ConfigService {
       'FREQ': '106.7 FM',
       'GENRE': 'HOT AC, POP, ROCK, SOUL',
     },
+    contactInfo: {
+      'WEBSITE':   'marafm.vercel.app',
+      'EMAIL':     'maramedia.id@gmail.com',
+      'INSTAGRAM': 'marfmbdg',
+      'TIKTOK':    'marafmbdg',
+      'FACEBOOK':  'Mara FM Bandung',
+    },
     youtubeApiKey: 'AIzaSyAhnU8eT-ig6z5GDUsGAZLLRKG2AcDEawM',
     youtubePlaylistId: 'PL0D016RZTNd9Gbr8Ma96MdrqoD0KwVYLq',
   );
@@ -200,11 +209,20 @@ class ConfigService {
         'GENRE': siteConfig['station_genre'] ?? defaultConfig.stationInfo['GENRE']!,
       };
 
+      final contactInfo = {
+        'WEBSITE':   siteConfig['contact_website']   ?? defaultConfig.contactInfo['WEBSITE']!,
+        'EMAIL':     siteConfig['contact_email']     ?? defaultConfig.contactInfo['EMAIL']!,
+        'INSTAGRAM': siteConfig['contact_instagram'] ?? defaultConfig.contactInfo['INSTAGRAM']!,
+        'TIKTOK':    siteConfig['contact_tiktok']    ?? defaultConfig.contactInfo['TIKTOK']!,
+        'FACEBOOK':  siteConfig['contact_facebook']  ?? defaultConfig.contactInfo['FACEBOOK']!,
+      };
+
       return AppConfig(
         channels:    channels,
         programs:    programs,
         appInfo:     appInfo,
         stationInfo: stationInfo,
+        contactInfo: contactInfo,
         youtubeApiKey: siteConfig['youtube_api_key'] ?? defaultConfig.youtubeApiKey,
         youtubePlaylistId: siteConfig['youtube_playlist_id'] ?? defaultConfig.youtubePlaylistId,
       );

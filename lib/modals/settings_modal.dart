@@ -155,6 +155,8 @@ class _SettingsModalState extends State<SettingsModal> {
                         _buildInfoSection('APP INFO', config.appInfo),
                         const SizedBox(height: 12),
                         _buildInfoSection('STATION', config.stationInfo),
+                        const SizedBox(height: 12),
+                        _buildInfoSection('CONTACT US', config.contactInfo),
                       ],
                     ),
                   ),
@@ -565,7 +567,7 @@ class _SettingsModalState extends State<SettingsModal> {
       onTap: () {
         final authState = context.read<AuthBloc>().state;
         if (authState is! AuthAuthenticated) {
-          _showSnackBar('YOU HAVE TO LOGIN TO ACCESS LIKED SONGS');
+          _showSnackBar('LOGIN TO ACCESS LIKED SONGS');
           return;
         }
         Navigator.pop(context);

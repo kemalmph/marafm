@@ -12,8 +12,14 @@ import './bloc/auth_bloc.dart';
 
 late AudioHandler _audioHandler;
 
-const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+const _supabaseUrl = String.fromEnvironment(
+  'SUPABASE_URL',
+  defaultValue: 'https://bgztfukvlxnmprnlisad.supabase.co',
+);
+const _supabaseAnonKey = String.fromEnvironment(
+  'SUPABASE_ANON_KEY',
+  defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnenRmdWt2bHhubXBybmxpc2FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MjAwNzgsImV4cCI6MjA5MTI5NjA3OH0.np-4GpjhI9B8iFxtvJrq7wgFarzTLjypUMnOlPRURQU',
+);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LikedSong {
   final String title;
@@ -19,9 +18,9 @@ class LikedSong {
   };
 
   factory LikedSong.fromJson(Map<String, dynamic> json) => LikedSong(
-    title: json['title'],
-    artist: json['artist'],
-    likedAt: DateTime.parse(json['likedAt']),
+    title: json['title'] as String? ?? 'Unknown',
+    artist: json['artist'] as String? ?? 'Unknown Artist',
+    likedAt: DateTime.parse(json['liked_at'] ?? json['likedAt'] ?? DateTime.now().toIso8601String()),
   );
 
   @override
@@ -37,46 +36,77 @@ class LikedSong {
 }
 
 class LikedSongsService {
-  static const String _key = 'liked_songs';
+  final SupabaseClient _supabase = Supabase.instance.client;
+
+  String? get _userId => _supabase.auth.currentUser?.id;
 
   Future<void> addLikedSong(String title, String artist) async {
-    final prefs = await SharedPreferences.getInstance();
-    final songs = await getLikedSongs();
-    final newSong = LikedSong(
-      title: title,
-      artist: artist,
-      likedAt: DateTime.now(),
-    );
+    final userId = _userId;
+    if (userId == null) return;
 
-    if (!songs.contains(newSong)) {
-      songs.add(newSong);
-      await _saveSongs(prefs, songs);
+    try {
+      await _supabase.from('liked_songs').upsert({
+        'user_id': userId,
+        'title': title,
+        'artist': artist,
+        'liked_at': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      // Return gracefully on error
     }
   }
 
   Future<void> removeLikedSong(String title, String artist) async {
-    final prefs = await SharedPreferences.getInstance();
-    final songs = await getLikedSongs();
-    songs.removeWhere((s) => s.title == title && s.artist == artist);
-    await _saveSongs(prefs, songs);
+    final userId = _userId;
+    if (userId == null) return;
+
+    try {
+      await _supabase.from('liked_songs').delete().match({
+        'user_id': userId,
+        'title': title,
+        'artist': artist,
+      });
+    } catch (e) {
+      // Return gracefully on error
+    }
   }
 
   Future<List<LikedSong>> getLikedSongs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? songsJson = prefs.getString(_key);
-    if (songsJson == null) return [];
+    final userId = _userId;
+    if (userId == null) return [];
 
-    final List<dynamic> decoded = jsonDecode(songsJson);
-    return decoded.map((item) => LikedSong.fromJson(item)).toList();
+    try {
+      final response = await _supabase
+          .from('liked_songs')
+          .select()
+          .eq('user_id', userId)
+          .order('liked_at', ascending: false);
+
+      final List<dynamic> data = response as List<dynamic>;
+      return data.map((item) => LikedSong.fromJson(item)).toList();
+    } catch (e) {
+      return [];
+    }
   }
 
   Future<bool> isLiked(String title, String artist) async {
-    final songs = await getLikedSongs();
-    return songs.any((s) => s.title == title && s.artist == artist);
-  }
+    final userId = _userId;
+    if (userId == null) return false;
 
-  Future<void> _saveSongs(SharedPreferences prefs, List<LikedSong> songs) async {
-    final encoded = jsonEncode(songs.map((s) => s.toJson()).toList());
-    await prefs.setString(_key, encoded);
+    try {
+      final response = await _supabase
+          .from('liked_songs')
+          .select('id')
+          .match({
+            'user_id': userId,
+            'title': title,
+            'artist': artist,
+          })
+          .maybeSingle();
+
+      return response != null;
+    } catch (e) {
+      return false;
+    }
   }
 }

@@ -8,6 +8,7 @@ import '../services/metadata_service.dart';
 import '../models/station_metadata.dart';
 import '../models/radio_channel.dart';
 import '../services/audio_handler.dart';
+import '../services/listener_session_service.dart';
 
 // Events
 abstract class PlaybackEvent extends Equatable {
@@ -15,7 +16,12 @@ abstract class PlaybackEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class PlayRequested extends PlaybackEvent {}
+class PlayRequested extends PlaybackEvent {
+  final bool isSwitch;
+  PlayRequested({this.isSwitch = false});
+  @override
+  List<Object?> get props => [isSwitch];
+}
 class PauseRequested extends PlaybackEvent {}
 class StopRequested extends PlaybackEvent {}
 class ToggleVideoRequested extends PlaybackEvent {}
@@ -205,8 +211,12 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
       final streamUrl = state.currentChannel.streamUrl;
       await _audioHandler.playFromUri(Uri.parse(streamUrl));
       
-      // Mark this stream as the genuinely active one
       emit(state.copyWith(activeStreamUrl: streamUrl));
+      
+      // Start session tracking if not already switched
+      if (!event.isSwitch) {
+        ListenerSessionService.instance.startSession(state.currentChannel.name, 'radio');
+      }
       
       add(RefreshMetadataRequested());
     } catch (e) {
@@ -230,18 +240,21 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
     ));
 
     if (state.isPlaying) {
-      add(PlayRequested()); // Restart playback with new URL
+      ListenerSessionService.instance.switchChannel(event.channel.name, 'radio');
+      add(PlayRequested(isSwitch: true)); // Restart playback with new URL
     } else {
       add(RefreshMetadataRequested());
     }
   }
 
   Future<void> _onPause(PauseRequested event, Emitter<PlaybackState> emit) async {
+    await ListenerSessionService.instance.endSession();
     await _audioHandler.pause();
     emit(state.copyWith(isPlaying: false, isPaused: true));
   }
 
   Future<void> _onStop(StopRequested event, Emitter<PlaybackState> emit) async {
+    await ListenerSessionService.instance.endSession();
     await _audioHandler.stop();
     emit(state.copyWith(isPlaying: false, isPaused: false));
   }

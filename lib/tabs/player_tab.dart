@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // Added
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -211,7 +212,10 @@ class _PlayerTabState extends State<PlayerTab> {
         ],
       ),
       child: InkWell(
-        onTap: () => _showChannelSelectionModal(context),
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          _showChannelSelectionModal(context);
+        },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -532,7 +536,10 @@ class _PlayerTabState extends State<PlayerTab> {
                     style: AppTheme.retroStyle(fontSize: 14, color: AppTheme.accentOrange),
                   ),
                   InkWell(
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.pop(context);
+                    },
                     child: Container(
                       width: 32,
                       height: 32,

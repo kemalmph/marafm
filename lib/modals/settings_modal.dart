@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/config_bloc.dart';
 import '../theme/app_theme.dart';
@@ -69,7 +71,10 @@ class _SettingsModalState extends State<SettingsModal> {
     late OverlayEntry entry;
     entry = OverlayEntry(
       builder: (_) => GestureDetector(
-        onTap: () => entry.remove(),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          entry.remove();
+        },
         child: Container(
           color: Colors.black.withValues(alpha: 0.6),
           child: Center(
@@ -101,6 +106,39 @@ class _SettingsModalState extends State<SettingsModal> {
     Future.delayed(const Duration(seconds: 3), () {
       if (entry.mounted) entry.remove();
     });
+  }
+
+  Future<void> _handleLink(String key, String value) async {
+    if (value.isEmpty) return;
+    
+    HapticFeedback.lightImpact();
+    Uri? uri;
+    final cleanKey = key.toUpperCase();
+    final cleanValue = value.trim();
+
+    if (cleanKey.contains('EMAIL')) {
+      uri = Uri.parse('mailto:$cleanValue');
+    } else if (cleanKey.contains('WEBSITE') || cleanValue.startsWith('http')) {
+      uri = Uri.parse(cleanValue.startsWith('http') ? cleanValue : 'https://$cleanValue');
+    } else if (cleanKey.contains('INSTAGRAM')) {
+      final handle = cleanValue.replaceAll('@', '');
+      uri = Uri.parse('https://instagram.com/$handle');
+    } else if (cleanKey.contains('TIKTOK')) {
+      final handle = cleanValue.startsWith('@') ? cleanValue : '@$cleanValue';
+      uri = Uri.parse('https://tiktok.com/$handle');
+    } else if (cleanKey.contains('FACEBOOK')) {
+      uri = Uri.parse(cleanValue.startsWith('http') ? cleanValue : 'https://facebook.com/$cleanValue');
+    } else if (cleanKey.contains('TWITTER') || cleanKey == 'X') {
+      final handle = cleanValue.replaceAll('@', '');
+      uri = Uri.parse('https://x.com/$handle');
+    } else if (cleanKey.contains('WHATSAPP') || cleanKey.contains('PHONE')) {
+      final phone = cleanValue.replaceAll(RegExp(r'\D'), '');
+      uri = Uri.parse('https://wa.me/$phone');
+    }
+
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   @override
@@ -181,7 +219,10 @@ class _SettingsModalState extends State<SettingsModal> {
           Text('SETTINGS',
               style: AppTheme.retroStyle(fontSize: 14, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
           InkWell(
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.pop(context);
+            },
             child: Container(
               width: 32, height: 32,
               decoration: BoxDecoration(
@@ -389,10 +430,20 @@ class _SettingsModalState extends State<SettingsModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label,
-              style: AppTheme.retroStyle(fontSize: 9, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+              style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
           const SizedBox(height: 2),
-          Text(value.toString(),
-              style: AppTheme.bodyStyle(fontSize: 12, color: Colors.white)),
+          GestureDetector(
+            onTap: () => _handleLink(label, value.toString()),
+            child: Text(
+              value.toString(),
+              style: AppTheme.bodyStyle(
+                fontSize: 14, 
+                color: Colors.white,
+                decoration: _isLinkable(label) ? TextDecoration.underline : null,
+                decorationColor: AppTheme.primaryTeal,
+              ),
+            ),
+          ),
           const SizedBox(height: 4),
           Container(height: 1, color: AppTheme.borderGrey.withValues(alpha: 0.3)),
         ],
@@ -656,7 +707,10 @@ class _SettingsModalState extends State<SettingsModal> {
                         _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
                         color: AppTheme.borderGrey, size: 14,
                       ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _obscurePassword = !_obscurePassword);
+                      },
                     )
                   : null,
             ),
@@ -696,13 +750,35 @@ class _SettingsModalState extends State<SettingsModal> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(e.key,
-                  style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
-              Text(e.value,
-                  style: AppTheme.bodyStyle(fontSize: 10, color: Colors.white)),
+                  style: AppTheme.retroStyle(fontSize: 11, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
+              GestureDetector(
+                onTap: () => _handleLink(e.key, e.value),
+                child: Text(
+                  e.value,
+                  style: AppTheme.bodyStyle(
+                    fontSize: 14, 
+                    color: Colors.white,
+                    decoration: _isLinkable(e.key) ? TextDecoration.underline : null,
+                    decorationColor: AppTheme.primaryTeal,
+                  ),
+                ),
+              ),
             ],
           ),
         )).toList(),
       ),
     );
+  }
+
+  bool _isLinkable(String key) {
+    final k = key.toUpperCase();
+    return k.contains('WEBSITE') || 
+           k.contains('EMAIL') || 
+           k.contains('INSTAGRAM') || 
+           k.contains('TIKTOK') || 
+           k.contains('FACEBOOK') || 
+           k.contains('TWITTER') || 
+           k.contains('WHATSAPP') || 
+           k == 'X';
   }
 }

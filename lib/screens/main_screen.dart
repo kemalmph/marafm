@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_theme.dart';
@@ -28,6 +29,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<String> _tabs = ['Player', 'On Air', 'Podcast', 'News'];
 
   void _onTabTapped(int index) {
+    HapticFeedback.selectionClick();
     setState(() {
       _currentIndex = index;
     });
@@ -161,30 +163,42 @@ class _MainScreenState extends State<MainScreen> {
                       icon: LucideIcons.play,
                       isActive: state.isPlaying || (state.isLoading && !state.isPaused),
                       activeColor: AppTheme.accentOrange,
-                      onTap: () => context.read<PlaybackBloc>().add(PlayRequested()),
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        context.read<PlaybackBloc>().add(PlayRequested());
+                      },
                     ),
                     _buildPlaybackButton(
                       context: context,
                       icon: LucideIcons.pause,
                       isActive: state.isPaused,
                       activeColor: AppTheme.accentOrange,
-                      onTap: () => context.read<PlaybackBloc>().add(PauseRequested()),
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        context.read<PlaybackBloc>().add(PauseRequested());
+                      },
                     ),
                     _buildPlaybackButton(
                       context: context,
                       icon: LucideIcons.square,
                       isActive: false,
                       activeColor: AppTheme.primaryTeal,
-                      onTap: () => context.read<PlaybackBloc>().add(StopRequested()),
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        context.read<PlaybackBloc>().add(StopRequested());
+                      },
                     ),
                     _buildPlaybackButton(
                       context: context,
-                      icon: LucideIcons.video,
+                      text: "LIVE/\nCOLOUR",
                       isActive: state.isVideoOn,
                       activeColor: AppTheme.primaryTeal,
                       highlightColor: AppTheme.tealHighlight,
                       shadowColor: AppTheme.tealShadow,
-                      onTap: () => context.read<PlaybackBloc>().add(ToggleVideoRequested()),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        context.read<PlaybackBloc>().add(ToggleVideoRequested());
+                      },
                     ),
                   ],
                 ),
@@ -219,7 +233,8 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildPlaybackButton({
     required BuildContext context,
-    required IconData icon,
+    IconData? icon,
+    String? text,
     required bool isActive,
     required Color activeColor,
     Color? highlightColor,
@@ -239,11 +254,21 @@ class _MainScreenState extends State<MainScreen> {
             shadowColor: isActive ? shadowColor : null,
           ),
           child: Center(
-            child: Icon(
-              icon,
-              color: isActive ? Colors.black : AppTheme.primaryTeal,
-              size: 24,
-            ),
+            child: text != null
+                ? Text(
+                    text,
+                    textAlign: TextAlign.center,
+                    style: AppTheme.retroStyle(
+                      fontSize: 8,
+                      color: isActive ? Colors.black : AppTheme.primaryTeal,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : Icon(
+                    icon!,
+                    color: isActive ? Colors.black : AppTheme.primaryTeal,
+                    size: 24,
+                  ),
           ),
         ),
       ),

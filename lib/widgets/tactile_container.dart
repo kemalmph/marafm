@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TactileContainer extends StatefulWidget {
   final Widget Function(BuildContext context, bool isPressed) builder;
@@ -16,7 +17,10 @@ class _TactileContainerState extends State<TactileContainer> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapDown: (_) {
+        HapticFeedback.lightImpact();
+        setState(() => _isPressed = true);
+      },
       onTapUp: (_) {
         setState(() => _isPressed = false);
         widget.onTap();

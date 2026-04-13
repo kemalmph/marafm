@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -102,11 +103,17 @@ class _LikedSongsModalState extends State<LikedSongsModal> {
                   if (_likedSongs.isNotEmpty)
                     IconButton(
                       icon: const Icon(LucideIcons.share, color: AppTheme.primaryTeal, size: 20),
-                      onPressed: _shareLikedSongs,
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        _shareLikedSongs();
+                      },
                     ),
                   const SizedBox(width: 8),
                   InkWell(
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.pop(context);
+                    },
                     child: Container(
                       width: 32,
                       height: 32,
@@ -171,7 +178,10 @@ class _LikedSongsModalState extends State<LikedSongsModal> {
                                 ),
                                 IconButton(
                                   icon: const Icon(LucideIcons.trash2, color: AppTheme.accentOrange, size: 18),
-                                  onPressed: () => _removeSong(song),
+                                  onPressed: () {
+                                    HapticFeedback.lightImpact();
+                                    _removeSong(song);
+                                  },
                                 ),
                               ],
                             ),

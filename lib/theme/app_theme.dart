@@ -135,11 +135,15 @@ class AppTheme {
     double fontSize = 12,
     Color color = Colors.white,
     FontWeight fontWeight = FontWeight.normal,
+    TextDecoration? decoration,
+    Color? decorationColor,
   }) {
     return GoogleFonts.pressStart2p(
       fontSize: fontSize,
       color: color,
       fontWeight: fontWeight,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 
@@ -148,11 +152,15 @@ class AppTheme {
     double fontSize = 14,
     Color color = Colors.white,
     FontWeight fontWeight = FontWeight.normal,
+    TextDecoration? decoration,
+    Color? decorationColor,
   }) {
     return GoogleFonts.montserrat(
       fontSize: fontSize,
       color: color,
       fontWeight: fontWeight,
+      decoration: decoration,
+      decorationColor: decorationColor,
     );
   }
 }

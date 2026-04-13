@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../theme/app_theme.dart';
@@ -26,6 +27,7 @@ class _NewsTabState extends State<NewsTab> {
   }
 
   Future<void> _fetchNews() async {
+    HapticFeedback.mediumImpact();
     setState(() {
       _isLoading = true;
       _error = null;
@@ -159,7 +161,10 @@ class _PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(

@@ -16,6 +16,16 @@ class SupabaseService {
     return List<Map<String, dynamic>>.from(response);
   }
 
+  /// Fetch Instagram posts from news_feed ordered by newest first.
+  Future<List<Map<String, dynamic>>> getNewsFeed({int limit = 30}) async {
+    final response = await client
+        .from('news_feed')
+        .select()
+        .order('timestamp', ascending: false)
+        .limit(limit);
+    return List<Map<String, dynamic>>.from(response);
+  }
+
   /// Fetch active channels ordered by sort_order ascending.
   Future<List<Map<String, dynamic>>> getChannels() async {
     final response = await client

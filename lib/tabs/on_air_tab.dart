@@ -71,7 +71,7 @@ class _OnAirTabState extends State<OnAirTab> with SingleTickerProviderStateMixin
         return BlocBuilder<PlaybackBloc, PlaybackState>(
           builder: (context, state) {
             final currentChannel = state.currentChannel;
-            final isMara = currentChannel.name == 'MARA FM';
+            final isInternal = currentChannel.channelType == 'internal';
 
             return ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -85,7 +85,7 @@ class _OnAirTabState extends State<OnAirTab> with SingleTickerProviderStateMixin
                 // Channel Info
                 _buildChannelInfo(currentChannel),
 
-                if (isMara) ...[
+                if (isInternal) ...[
                   const SizedBox(height: 16),
                   Text(
                     'TODAYS PROGRAMS',
@@ -114,7 +114,7 @@ class _OnAirTabState extends State<OnAirTab> with SingleTickerProviderStateMixin
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildInfoRow('STATION', channel.name),
-          if (channel.name == 'MARA FM') ...[
+          if (channel.channelType == 'internal') ...[
             const SizedBox(height: 8),
             _buildInfoRow('FREQ', '106.7 FM'),
           ],

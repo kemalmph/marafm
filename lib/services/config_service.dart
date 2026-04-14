@@ -33,6 +33,7 @@ class ConfigService {
         genre: 'Pop, Rock, Soul',
         description: 'Bandung\'s go-to station for the best in Contemporary Hit Radio, both International and Indonesian songs. Mara FM spins a carefully curated mix of today\'s hottest tracks alongside timeless hits spanning from the 80s to now.',
         website: 'marafm.com',
+        channelType: 'internal',
       ),
       const RadioChannel(
         name: 'Lofi Radio',
@@ -173,6 +174,7 @@ class ConfigService {
                 genre:       (r['genre']        as String?) ?? '',
                 description: (r['description']  as String?) ?? '',
                 website:     (r['website']      as String?) ?? '',
+                channelType: (r['channel_type'] as String?) ?? 'external',
               )).toList()
           : defaultConfig.channels;
 

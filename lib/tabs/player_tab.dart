@@ -284,7 +284,7 @@ class _PlayerTabState extends State<PlayerTab> {
                         final isCurrent = bloc.state.currentChannel == channel;
                         final isLast = channels.last == channel;
                         final authState = outerContext.read<AuthBloc>().state;
-                        final isLocked = channel.name != 'MARA FM' && authState is! AuthAuthenticated;
+                        final isLocked = channel.channelType != 'internal' && authState is! AuthAuthenticated;
 
                         return Padding(
                           padding: EdgeInsets.only(bottom: isLast ? 0 : 12),

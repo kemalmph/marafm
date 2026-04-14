@@ -5,6 +5,7 @@ class RadioChannel {
   final String genre;
   final String description;
   final String website;
+  final String channelType;
 
   const RadioChannel({
     required this.name,
@@ -13,6 +14,7 @@ class RadioChannel {
     this.genre = '',
     this.description = '',
     this.website = '',
+    this.channelType = 'external',
   });
 
   factory RadioChannel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class RadioChannel {
       genre: json['genre'] as String? ?? '',
       description: json['description'] as String? ?? '',
       website: json['website'] as String? ?? '',
+      channelType: json['channelType'] ?? json['channel_type'] ?? 'external',
     );
   }
 
@@ -34,6 +37,7 @@ class RadioChannel {
       'genre': genre,
       'description': description,
       'website': website,
+      'channelType': channelType,
     };
   }
 
@@ -44,5 +48,6 @@ class RadioChannel {
     genre: 'Pop, Rock, Soul',
     description: 'Bandung\'s go-to station for the best in Contemporary Hit Radio, both International and Indonesian songs. Mara FM spins a carefully curated mix of today\'s hottest tracks alongside timeless hits spanning from the 80s to now.',
     website: 'marafm.com',
+    channelType: 'internal',
   );
 }

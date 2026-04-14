@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ListenerSessionService {
   ListenerSessionService._();
@@ -7,16 +8,28 @@ class ListenerSessionService {
   final SupabaseClient _supabase = Supabase.instance.client;
   String? _sessionId;
 
-  Future<void> startSession(String channelName, String channelType) async {
-    final user = _supabase.auth.currentUser;
-    if (user == null) return;
+  Future<String> _getDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? id = prefs.getString('device_id');
+    if (id == null) {
+      id = 'device_${DateTime.now().millisecondsSinceEpoch}';
+      await prefs.setString('device_id', id);
+    }
+    return id;
+  }
 
+  Future<void> startSession(String channelName, String channelType) async {
     try {
+      final user = _supabase.auth.currentUser;
+      final deviceId = await _getDeviceId();
+
       final response = await _supabase.from('listener_sessions').insert({
-        'user_id': user.id,
+        'user_id': user?.id,        // null for anonymous users
         'channel_name': channelName,
         'channel_type': channelType,
         'platform': 'flutter',
+        'device_id': deviceId,
+        'is_anonymous': user == null,
         'started_at': DateTime.now().toIso8601String(),
       }).select().single();
 

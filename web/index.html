@@ -110,6 +110,42 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script>
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      deferredPrompt = e;
+      console.log('PWA: beforeinstallprompt event stashed');
+    });
+
+    window.addEventListener('appinstalled', (event) => {
+      console.log('PWA: installed successfully');
+      deferredPrompt = null;
+    });
+
+    async function installPWA() {
+      if (!deferredPrompt) {
+        console.log('PWA: No prompt available');
+        return false;
+      }
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`PWA: User choice outcome: ${outcome}`);
+      deferredPrompt = null;
+      return outcome === 'accepted';
+    }
+
+    function isPWAInstalled() {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    function hasInstallPrompt() {
+      return !!deferredPrompt;
+    }
+  </script>
   <script src="flutter_bootstrap.js" async=""></script>
 
 

@@ -15,6 +15,7 @@ import '../widgets/native_airplay_button.dart';
 import '../main.dart'; // For CrtOverlay
 import '../widgets/tactile_container.dart';
 import '../services/audio_handler.dart';
+import '../widgets/install_pwa_prompt.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -27,6 +28,14 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<String> _tabs = ['Player', 'On Air', 'Podcast', 'News'];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      InstallPwaPrompt.checkAndShow(context);
+    });
+  }
 
   void _onTabTapped(int index) {
     HapticFeedback.selectionClick();

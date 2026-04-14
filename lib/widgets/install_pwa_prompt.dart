@@ -51,11 +51,11 @@ class InstallPwaPrompt {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => _PromptContainer(
-        title: 'INSTALL APP',
+        title: 'INSTALL MARA FM',
         child: Column(
           children: [
             Text(
-              "FOR THE BEST EXPERIENCE, INSTALL MARA FM TO YOUR HOME SCREEN.",
+              "ADD MARA FM TO YOUR HOME SCREEN.",
               textAlign: TextAlign.center,
               style: AppTheme.bodyStyle(fontSize: 11, color: Colors.white70),
             ),
@@ -97,12 +97,12 @@ class InstallPwaPrompt {
         insetPadding: const EdgeInsets.all(20),
         backgroundColor: Colors.transparent,
         child: _PromptContainer(
-          title: 'INSTALL APP',
+          title: 'INSTALL MARA FM',
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "WOULD YOU LIKE TO INSTALL MARA FM AS AN APP FOR QUICK ACCESS?",
+                "WOULD YOU LIKE TO ADD MARA FM TO HOMESCREEN?",
                 textAlign: TextAlign.center,
                 style: AppTheme.bodyStyle(fontSize: 11, color: Colors.white70),
               ),
@@ -124,7 +124,7 @@ class InstallPwaPrompt {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _RetroButton(
-                      label: "INSTALL",
+                      label: "ADD",
                       color: AppTheme.accentOrange,
                       onPressed: () async {
                         try {

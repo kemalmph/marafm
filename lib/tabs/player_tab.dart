@@ -451,7 +451,7 @@ class _PlayerTabState extends State<PlayerTab> {
     );
   }
 
-  void _showShareModal(StationMetadata? metadata) {
+  void _showShareModal(StationMetadata? metadata, String channelName) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -459,6 +459,7 @@ class _PlayerTabState extends State<PlayerTab> {
       builder: (context) => ShareModal(
         songTitle: metadata?.title ?? 'Unknown Title',
         artist: metadata?.artist ?? 'Unknown Artist',
+        channelName: channelName,
       ),
     );
   }
@@ -482,7 +483,7 @@ class _PlayerTabState extends State<PlayerTab> {
         _buildActionButton(
           icon: LucideIcons.share2,
           color: AppTheme.primaryTeal,
-          onTap: () => _showShareModal(state.metadata),
+          onTap: () => _showShareModal(state.metadata, state.currentChannel.name),
         ),
         _buildActionButton(
           icon: LucideIcons.history,

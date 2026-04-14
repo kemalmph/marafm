@@ -8,11 +8,13 @@ import 'package:share_plus/share_plus.dart';
 class ShareModal extends StatefulWidget {
   final String songTitle;
   final String artist;
+  final String channelName;
 
   const ShareModal({
     super.key,
     required this.songTitle,
     required this.artist,
+    required this.channelName,
   });
 
   @override
@@ -25,7 +27,11 @@ class _ShareModalState extends State<ShareModal> {
   @override
   void initState() {
     super.initState();
-    final String initialMessage = "I love this song! Now playing on Mara FM: ${widget.songTitle.toUpperCase()} - ${widget.artist.toUpperCase()} https://mara.fm";
+    String channelPart = "";
+    if (widget.channelName.toUpperCase() != "MARA FM") {
+      channelPart = " in ${widget.channelName}";
+    }
+    final String initialMessage = "I love this song! Now playing on Mara FM$channelPart: ${widget.songTitle.toUpperCase()} - ${widget.artist.toUpperCase()} [https://marafm.com]";
     _controller = TextEditingController(text: initialMessage);
   }
 
@@ -141,7 +147,7 @@ class _ShareModalState extends State<ShareModal> {
                   icon: LucideIcons.facebook,
                   color: const Color(0xFF4267B2),
                   onTap: () => _shareToUrl(
-                    'https://www.facebook.com/sharer/sharer.php?quote=${Uri.encodeComponent(_controller.text)}&u=${Uri.encodeComponent('https://mara.fm')}',
+                    'https://www.facebook.com/sharer/sharer.php?quote=${Uri.encodeComponent(_controller.text)}&u=${Uri.encodeComponent('https://marafm.com')}',
                   ),
                 ),
                 const SizedBox(width: 8),

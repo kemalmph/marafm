@@ -100,28 +100,39 @@ class _PlayerTabState extends State<PlayerTab> {
         final metadata = state.metadata;
         _checkLikedStatus(metadata);
         
-        return SingleChildScrollView(
-          padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 16),
-          child: Column(
-            children: [
-              // CRT Screen (Album Art)
-              _buildCrtScreen(metadata?.artUrl, state.isVideoOn, state.currentChannel.name),
-
-              const SizedBox(height: 12),
-
-              // Channel Selector
-              _buildChannelSelector(state),
-
-              const SizedBox(height: 8),
-
-              // Now Playing Card
-              _buildNowPlayingCard(state),
-
-              const SizedBox(height: 12),
-
-              // Action Grid
-              _buildActionGrid(state),
-            ],
+        return RefreshIndicator(
+          onRefresh: () async {
+            HapticFeedback.mediumImpact();
+            context.read<ConfigBloc>().add(RefreshConfigRequested());
+            // Wait for next state change or a small delay to ensure UI reflects new data
+            await Future.delayed(const Duration(milliseconds: 500));
+          },
+          color: AppTheme.primaryTeal,
+          backgroundColor: AppTheme.cardGrey,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 16),
+            child: Column(
+              children: [
+                // CRT Screen (Album Art)
+                _buildCrtScreen(metadata?.artUrl, state.isVideoOn, state.currentChannel.name),
+  
+                const SizedBox(height: 12),
+  
+                // Channel Selector
+                _buildChannelSelector(state),
+  
+                const SizedBox(height: 8),
+  
+                // Now Playing Card
+                _buildNowPlayingCard(state),
+  
+                const SizedBox(height: 12),
+  
+                // Action Grid
+                _buildActionGrid(state),
+              ],
+            ),
           ),
         );
       },

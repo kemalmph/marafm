@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shimmer/shimmer.dart';
 import '../theme/app_theme.dart';
 import '../services/news_service.dart';
 import '../models/news_item.dart';
@@ -18,26 +19,32 @@ class _NewsTabState extends State<NewsTab> {
   final NewsService _newsService = NewsService();
   List<NewsItem>? _items;
   bool _isLoading = true;
+  bool _isRefreshing = false;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _fetchNews();
+    _fetchNews(isInitial: true);
   }
 
-  Future<void> _fetchNews() async {
+  Future<void> _fetchNews({bool isInitial = false}) async {
+    if (_isRefreshing) return;
     HapticFeedback.mediumImpact();
     setState(() {
-      _isLoading = true;
+      _isRefreshing = !isInitial;
+      if (_items == null) {
+        _isLoading = true;
+      }
       _error = null;
     });
     try {
-      final items = await _newsService.fetchNewsFromSupabase();
+      final items = await _newsService.fetchNewsFromSupabase(forceSync: !isInitial);
       if (mounted) {
         setState(() {
           _items = items;
           _isLoading = false;
+          _isRefreshing = false;
         });
       }
     } catch (e) {
@@ -45,6 +52,7 @@ class _NewsTabState extends State<NewsTab> {
         setState(() {
           _error = e.toString();
           _isLoading = false;
+          _isRefreshing = false;
         });
       }
     }
@@ -131,7 +139,7 @@ class _NewsTabState extends State<NewsTab> {
             const Spacer(),
             // Refresh button
             GestureDetector(
-              onTap: _fetchNews,
+              onTap: _isRefreshing ? null : _fetchNews,
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
@@ -139,7 +147,16 @@ class _NewsTabState extends State<NewsTab> {
                   border: Border.all(color: AppTheme.borderGrey, width: 2),
                   boxShadow: const [AppTheme.miniArcadeShadow],
                 ),
-                child: const Icon(LucideIcons.refreshCw, color: AppTheme.primaryTeal, size: 14),
+                child: _isRefreshing
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          color: AppTheme.primaryTeal,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(LucideIcons.refreshCw, color: AppTheme.primaryTeal, size: 14),
               ),
             ),
           ],
@@ -292,19 +309,21 @@ class _MediaImage extends StatelessWidget {
               color: Colors.black,
               child: const Icon(LucideIcons.image, color: AppTheme.borderGrey, size: 32),
             ),
+            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+              if (wasSynchronouslyLoaded) return child;
+              return AnimatedOpacity(
+                opacity: frame == null ? 0 : 1,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeIn,
+                child: child,
+              );
+            },
             loadingBuilder: (_, child, progress) {
               if (progress == null) return child;
-              return Container(
-                color: Colors.black,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    value: progress.expectedTotalBytes != null
-                        ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
-                        : null,
-                    color: AppTheme.primaryTeal,
-                    strokeWidth: 2,
-                  ),
-                ),
+              return Shimmer.fromColors(
+                baseColor: AppTheme.cardGrey,
+                highlightColor: AppTheme.borderGrey,
+                child: Container(color: Colors.white),
               );
             },
           ),
@@ -373,24 +392,62 @@ class _LoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            width: 32,
-            height: 32,
-            child: CircularProgressIndicator(
-              color: AppTheme.primaryTeal,
-              strokeWidth: 3,
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => const _PostCardSkeleton(),
+          childCount: 3,
+        ),
+      ),
+    );
+  }
+}
+
+class _PostCardSkeleton extends StatelessWidget {
+  const _PostCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.cardGrey,
+        border: Border.all(color: AppTheme.borderGrey, width: 3),
+      ),
+      child: Shimmer.fromColors(
+        baseColor: AppTheme.cardGrey,
+        highlightColor: AppTheme.borderGrey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: Container(color: Colors.white),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'LOADING FEED…',
-            style: AppTheme.retroStyle(fontSize: 8, color: AppTheme.primaryTeal),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(width: 60, height: 10, color: Colors.white),
+                  const SizedBox(height: 10),
+                  Container(width: double.infinity, height: 12, color: Colors.white),
+                  const SizedBox(height: 6),
+                  Container(width: 150, height: 12, color: Colors.white),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(width: 80, height: 8, color: Colors.white),
+                      Container(width: 60, height: 20, color: Colors.white),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

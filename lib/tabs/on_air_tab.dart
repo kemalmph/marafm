@@ -15,9 +15,11 @@ class OnAirTab extends StatefulWidget {
   State<OnAirTab> createState() => _OnAirTabState();
 }
 
-class _OnAirTabState extends State<OnAirTab> {
+class _OnAirTabState extends State<OnAirTab> with SingleTickerProviderStateMixin {
   late Timer _timer;
   DateTime _now = DateTime.now();
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
 
   @override
   void initState() {
@@ -29,11 +31,21 @@ class _OnAirTabState extends State<OnAirTab> {
         });
       }
     });
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+    
+    _pulseAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
   }
 
   @override
   void dispose() {
     _timer.cancel();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -192,16 +204,28 @@ class _OnAirTabState extends State<OnAirTab> {
                       ),
                       if (isLive) ...[
                         const SizedBox(width: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            border: Border.all(color: AppTheme.shadowOrange, width: 2),
-                          ),
-                          child: Text(
-                            'LIVE',
-                            style: AppTheme.retroStyle(fontSize: 9, color: AppTheme.accentOrange, fontWeight: FontWeight.bold),
-                          ),
+                        AnimatedBuilder(
+                          animation: _pulseAnimation,
+                          builder: (context, child) {
+                            return Opacity(
+                              opacity: _pulseAnimation.value,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  border: Border.all(color: AppTheme.shadowOrange, width: 2),
+                                ),
+                                child: Text(
+                                  'LIVE',
+                                  style: AppTheme.retroStyle(
+                                    fontSize: 9,
+                                    color: AppTheme.accentOrange,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ],

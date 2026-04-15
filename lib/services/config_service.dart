@@ -10,6 +10,7 @@ class AppConfig {
   final Map<String, String> contactInfo;
   final String youtubeApiKey;
   final String youtubePlaylistId;
+  final String shareMessageTemplate;
 
   AppConfig({
     required this.channels,
@@ -19,6 +20,7 @@ class AppConfig {
     this.contactInfo = const {},
     this.youtubeApiKey = '',
     this.youtubePlaylistId = '',
+    this.shareMessageTemplate = 'I love this song! Now playing on Mara FM{channel}: {title} - {artist} [https://marafm.com]',
   });
 }
 
@@ -152,6 +154,7 @@ class ConfigService {
     },
     youtubeApiKey: 'AIzaSyAhnU8eT-ig6z5GDUsGAZLLRKG2AcDEawM',
     youtubePlaylistId: 'PL0D016RZTNd9Gbr8Ma96MdrqoD0KwVYLq',
+    shareMessageTemplate: 'I love this song! Now playing on Mara FM{channel}: {title} - {artist} [https://marafm.com]',
   );
 
   Future<AppConfig> fetchConfig() async {
@@ -227,6 +230,7 @@ class ConfigService {
         contactInfo: contactInfo,
         youtubeApiKey: siteConfig['youtube_api_key'] ?? defaultConfig.youtubeApiKey,
         youtubePlaylistId: siteConfig['youtube_playlist_id'] ?? defaultConfig.youtubePlaylistId,
+        shareMessageTemplate: siteConfig['share_message_template'] ?? defaultConfig.shareMessageTemplate,
       );
     } catch (_) {
       // Supabase tidak tersedia — pakai hardcoded default

@@ -9,12 +9,14 @@ class ShareModal extends StatefulWidget {
   final String songTitle;
   final String artist;
   final String channelName;
+  final String shareMessageTemplate;
 
   const ShareModal({
     super.key,
     required this.songTitle,
     required this.artist,
     required this.channelName,
+    required this.shareMessageTemplate,
   });
 
   @override
@@ -27,12 +29,14 @@ class _ShareModalState extends State<ShareModal> {
   @override
   void initState() {
     super.initState();
-    String channelPart = "";
-    if (widget.channelName.toUpperCase() != "MARA FM") {
-      channelPart = " in ${widget.channelName}";
-    }
-    final String initialMessage = "I love this song! Now playing on Mara FM$channelPart: ${widget.songTitle.toUpperCase()} - ${widget.artist.toUpperCase()} [https://marafm.com]";
-    _controller = TextEditingController(text: initialMessage);
+    final String channelPart = widget.channelName.toLowerCase() != 'mara fm'
+        ? ' in ${widget.channelName}'
+        : '';
+    final String message = widget.shareMessageTemplate
+        .replaceAll('{title}', widget.songTitle.toUpperCase())
+        .replaceAll('{artist}', widget.artist.toUpperCase())
+        .replaceAll('{channel}', channelPart);
+    _controller = TextEditingController(text: message);
   }
 
   @override

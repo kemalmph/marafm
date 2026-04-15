@@ -463,6 +463,7 @@ class _PlayerTabState extends State<PlayerTab> {
   }
 
   void _showShareModal(StationMetadata? metadata, String channelName) {
+    final template = context.read<ConfigBloc>().state.config.shareMessageTemplate;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -471,6 +472,7 @@ class _PlayerTabState extends State<PlayerTab> {
         songTitle: metadata?.title ?? 'Unknown Title',
         artist: metadata?.artist ?? 'Unknown Artist',
         channelName: channelName,
+        shareMessageTemplate: template,
       ),
     );
   }

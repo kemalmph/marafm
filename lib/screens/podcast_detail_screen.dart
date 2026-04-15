@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -71,15 +72,17 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
               decoration: AppTheme.screenDecoration.copyWith(
                 border: Border.all(color: AppTheme.borderGrey, width: 8),
               ),
-              child: YoutubePlayer(
-                controller: _controller,
-                showVideoProgressIndicator: true,
-                progressIndicatorColor: AppTheme.accentOrange,
-                progressColors: const ProgressBarColors(
-                  playedColor: AppTheme.accentOrange,
-                  handleColor: AppTheme.highlightOrange,
-                ),
-              ),
+              child: kIsWeb
+                  ? _buildWebVideoPlaceholder()
+                  : YoutubePlayer(
+                      controller: _controller,
+                      showVideoProgressIndicator: true,
+                      progressIndicatorColor: AppTheme.accentOrange,
+                      progressColors: const ProgressBarColors(
+                        playedColor: AppTheme.accentOrange,
+                        handleColor: AppTheme.highlightOrange,
+                      ),
+                    ),
             ),
 
             // Video Info
@@ -148,6 +151,64 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Web fallback: youtube_player_flutter doesn't support web.
+  /// Shows the video thumbnail with a play button that opens YouTube externally.
+  Widget _buildWebVideoPlaceholder() {
+    return GestureDetector(
+      onTap: () async {
+        final uri = Uri.parse(widget.video.videoUrl);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.network(
+              widget.video.thumbnailUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(color: Colors.black),
+            ),
+            // Darkened overlay
+            Container(color: Colors.black.withValues(alpha: 0.4)),
+            // YouTube-style play button
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF0000),
+                  border: Border.all(color: Colors.white24, width: 2),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black54, blurRadius: 8),
+                  ],
+                ),
+                child: const Icon(LucideIcons.play, color: Colors.white, size: 32),
+              ),
+            ),
+            // Label
+            Positioned(
+              bottom: 12,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  color: Colors.black54,
+                  child: Text(
+                    'TAP TO OPEN IN YOUTUBE',
+                    style: AppTheme.retroStyle(fontSize: 9, color: Colors.white),
+                  ),
+                ),
               ),
             ),
           ],

@@ -8,8 +8,8 @@ import '../services/chat_service.dart';
 
 // Only two entry points exposed to users
 const _categories = [
-  {'key': 'general', 'label': 'Chat', 'emoji': '💬', 'desc': 'Ngobrol sama studio'},
-  {'key': 'request', 'label': 'Request Lagu', 'emoji': '🎵', 'desc': 'Minta lagu favorit kamu'},
+  {'key': 'general', 'label': 'Chat', 'emoji': '💬', 'desc': 'Talk to the studio'},
+  {'key': 'request', 'label': 'Song Request', 'emoji': '🎵', 'desc': 'Request your favorite song'},
 ];
 
 // ─────────────────────────────────────────────
@@ -31,7 +31,7 @@ class ChatScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'CHAT STUDIO',
+          'STUDIO CHAT',
           style: AppTheme.retroStyle(fontSize: 12, color: AppTheme.accentOrange),
         ),
         bottom: PreferredSize(
@@ -162,7 +162,7 @@ class _RequestFormScreenState extends State<_RequestFormScreen> {
   Future<void> _submit() async {
     if (_judul.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Judul lagu wajib diisi.')),
+        const SnackBar(content: Text('Song title is required.')),
       );
       return;
     }
@@ -197,7 +197,7 @@ class _RequestFormScreenState extends State<_RequestFormScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal mengirim request, coba lagi.')),
+        const SnackBar(content: Text('Failed to send request. Please try again.')),
       );
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -226,7 +226,7 @@ class _RequestFormScreenState extends State<_RequestFormScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          '🎵 REQUEST LAGU',
+          '🎵 SONG REQUEST',
           style: AppTheme.retroStyle(fontSize: 11, color: AppTheme.accentOrange),
         ),
         bottom: PreferredSize(
@@ -240,13 +240,13 @@ class _RequestFormScreenState extends State<_RequestFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildField('Judul Lagu *', _judul, hint: 'cth: Tulus - Hati-Hati di Jalan'),
+              _buildField('Song Title *', _judul, hint: 'e.g. Tulus - Hati-Hati di Jalan'),
               const SizedBox(height: 16),
-              _buildField('Penyanyi / Artis', _penyanyi, hint: 'cth: Tulus'),
+              _buildField('Artist', _penyanyi, hint: 'e.g. Tulus'),
               const SizedBox(height: 16),
-              _buildField('Untuk Siapa', _untuk, hint: 'cth: Untuk Dinda di Cimahi'),
+              _buildField('Dedicated To', _untuk, hint: 'e.g. For Dinda in Cimahi'),
               const SizedBox(height: 16),
-              _buildField('Pesan', _pesan, hint: 'Pesan atau salam kamu...', maxLines: 3),
+              _buildField('Message', _pesan, hint: 'Your message or greeting...', maxLines: 3),
               const SizedBox(height: 28),
               GestureDetector(
                 onTap: _sending ? null : _submit,
@@ -272,7 +272,7 @@ class _RequestFormScreenState extends State<_RequestFormScreen> {
                           ),
                         )
                       : Text(
-                          'KIRIM REQUEST',
+                          'SEND REQUEST',
                           textAlign: TextAlign.center,
                           style: AppTheme.retroStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.bold),
                         ),
@@ -358,7 +358,7 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
   Future<void> _init() async {
     final user = _supabase.auth.currentUser;
     if (user == null) {
-      setState(() { _error = 'Kamu perlu login dulu untuk chat.'; _loading = false; });
+      setState(() { _error = 'You need to log in to chat.'; _loading = false; });
       return;
     }
     try {
@@ -370,7 +370,7 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
       _scrollToBottom();
     } catch (_) {
       if (!mounted) return;
-      setState(() { _error = 'Gagal memuat chat. Coba lagi.'; _loading = false; });
+      setState(() { _error = 'Failed to load chat. Please try again.'; _loading = false; });
     }
   }
 
@@ -405,7 +405,7 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal mengirim pesan, coba lagi.')),
+        const SnackBar(content: Text('Failed to send message. Please try again.')),
       );
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -441,14 +441,11 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
           child: Container(height: 4, color: AppTheme.highlightGrey),
         ),
       ),
-      body: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            Expanded(child: _buildMessages()),
-            _buildInputBar(),
-          ],
-        ),
+      body: Column(
+        children: [
+          Expanded(child: _buildMessages()),
+          _buildInputBar(),
+        ],
       ),
     );
   }
@@ -473,7 +470,7 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
             const Icon(Icons.chat_bubble_outline, color: AppTheme.borderGrey, size: 44),
             const SizedBox(height: 14),
             Text(
-              'Mulai percakapan\ndengan Mara FM Studio!',
+              'Start a conversation\nwith Mara FM Studio!',
               textAlign: TextAlign.center,
               style: AppTheme.bodyStyle(color: AppTheme.primaryTeal, fontSize: 15),
             ),
@@ -495,8 +492,14 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
   }
 
   Widget _buildInputBar() {
+    final bottomInset = MediaQuery.of(context).viewPadding.bottom;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.only(
+        left: 12,
+        right: 12,
+        top: 10,
+        bottom: bottomInset > 0 ? bottomInset + 8 : 20,
+      ),
       decoration: const BoxDecoration(
         color: AppTheme.cardGrey,
         border: Border(top: BorderSide(color: AppTheme.borderGrey, width: 2)),
@@ -511,7 +514,7 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _send(),
               decoration: InputDecoration(
-                hintText: 'Ketik pesan...',
+                hintText: 'Type a message...',
                 hintStyle: AppTheme.bodyStyle(fontSize: 14, color: AppTheme.borderGrey),
                 filled: true,
                 fillColor: AppTheme.surfaceGrey,

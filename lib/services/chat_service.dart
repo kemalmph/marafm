@@ -56,13 +56,10 @@ class ChatService {
           event: PostgresChangeEvent.insert,
           schema: 'public',
           table: 'chat_messages',
-          filter: PostgresChangeFilter(
-            type: FilterType.eq,
-            column: 'conversation_id',
-            value: conversationId,
-          ),
-          callback: (payload) =>
-              onMessage(ChatMessage.fromJson(payload.newRecord)),
+          callback: (payload) {
+            final msg = ChatMessage.fromJson(payload.newRecord);
+            if (msg.conversationId == conversationId) onMessage(msg);
+          },
         )
         .subscribe();
   }

@@ -193,7 +193,7 @@ class _SettingsModalState extends State<SettingsModal> {
                         const SizedBox(height: 12),
                         _buildInfoSection('STATION', config.stationInfo),
                         const SizedBox(height: 12),
-                        _buildInfoSection('CONTACT US', config.contactInfo),
+                        _buildContactSection(config),
                       ],
                     ),
                   ),
@@ -719,7 +719,7 @@ class _SettingsModalState extends State<SettingsModal> {
     );
   }
 
-  Widget _buildSectionBox(String title, Widget content) {
+  Widget _buildSectionBox(String title, Widget content, {Color? titleColor}) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -731,7 +731,7 @@ class _SettingsModalState extends State<SettingsModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
-              style: AppTheme.retroStyle(fontSize: 12, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
+              style: AppTheme.retroStyle(fontSize: 12, color: titleColor ?? AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           content,
         ],
@@ -743,28 +743,78 @@ class _SettingsModalState extends State<SettingsModal> {
     return _buildSectionBox(
       title,
       Column(
-        children: info.entries.map((e) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(e.key,
-                  style: AppTheme.retroStyle(fontSize: 11, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
-              GestureDetector(
-                onTap: () => _handleLink(e.key, e.value),
-                child: Text(
-                  e.value,
-                  style: AppTheme.bodyStyle(
-                    fontSize: 14, 
-                    color: Colors.white,
-                    decoration: _isLinkable(e.key) ? TextDecoration.underline : null,
-                    decorationColor: AppTheme.primaryTeal,
-                  ),
-                ),
+        children: info.entries.map((e) => _buildInfoRow2(e.key, e.value)).toList(),
+      ),
+      titleColor: AppTheme.accentOrange,
+    );
+  }
+
+  Widget _buildContactSection(AppConfig config) {
+    return _buildSectionBox(
+      'CONTACT US',
+      Column(
+        children: [
+          ...config.contactInfo.entries.map((e) => _buildInfoRow2(e.key, e.value)),
+          _buildUrlRow('ABOUT US', config.aboutUsText, config.aboutUsUrl),
+          _buildUrlRow('ADVERTISE', config.advertiseText, config.advertiseUrl),
+        ],
+      ),
+      titleColor: AppTheme.accentOrange,
+    );
+  }
+
+  Widget _buildInfoRow2(String key, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(key,
+              style: AppTheme.retroStyle(fontSize: 11, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
+          GestureDetector(
+            onTap: () => _handleLink(key, value),
+            child: Text(
+              value,
+              style: AppTheme.bodyStyle(
+                fontSize: 14,
+                color: Colors.white,
+                decoration: _isLinkable(key) ? TextDecoration.underline : null,
+                decorationColor: AppTheme.primaryTeal,
               ),
-            ],
+            ),
           ),
-        )).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUrlRow(String label, String text, String url) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: AppTheme.retroStyle(fontSize: 11, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
+          GestureDetector(
+            onTap: () async {
+              HapticFeedback.lightImpact();
+              final uri = Uri.parse(url.startsWith('http') ? url : 'https://$url');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+            },
+            child: Text(
+              text,
+              style: AppTheme.bodyStyle(
+                fontSize: 14,
+                color: AppTheme.primaryTeal,
+                decoration: TextDecoration.underline,
+                decorationColor: AppTheme.primaryTeal,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

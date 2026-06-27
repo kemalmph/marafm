@@ -11,6 +11,10 @@ class AppConfig {
   final String youtubeApiKey;
   final String youtubePlaylistId;
   final String shareMessageTemplate;
+  final String aboutUsText;
+  final String aboutUsUrl;
+  final String advertiseText;
+  final String advertiseUrl;
 
   AppConfig({
     required this.channels,
@@ -21,6 +25,10 @@ class AppConfig {
     this.youtubeApiKey = '',
     this.youtubePlaylistId = '',
     this.shareMessageTemplate = 'I love this song! Now playing on Mara FM{channel}: {title} - {artist} [https://marafm.com]',
+    this.aboutUsText = 'About Us',
+    this.aboutUsUrl = 'https://studio.marafm.com/about',
+    this.advertiseText = 'Advertise with Us',
+    this.advertiseUrl = 'https://studio.marafm.com/advertise',
   });
 }
 
@@ -231,6 +239,10 @@ class ConfigService {
         youtubeApiKey: siteConfig['youtube_api_key'] ?? defaultConfig.youtubeApiKey,
         youtubePlaylistId: siteConfig['youtube_playlist_id'] ?? defaultConfig.youtubePlaylistId,
         shareMessageTemplate: siteConfig['share_message_template'] ?? defaultConfig.shareMessageTemplate,
+        aboutUsText: siteConfig['contact_about_us_text'] ?? defaultConfig.aboutUsText,
+        aboutUsUrl: siteConfig['contact_about_us_url'] ?? defaultConfig.aboutUsUrl,
+        advertiseText: siteConfig['contact_advertise_text'] ?? defaultConfig.advertiseText,
+        advertiseUrl: siteConfig['contact_advertise_url'] ?? defaultConfig.advertiseUrl,
       );
     } catch (_) {
       // Supabase tidak tersedia — pakai hardcoded default

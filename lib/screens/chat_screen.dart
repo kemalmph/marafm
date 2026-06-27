@@ -122,12 +122,12 @@ class _CategoryTileState extends State<_CategoryTile> {
                 children: [
                   Text(
                     widget.label,
-                    style: AppTheme.retroStyle(fontSize: 11, color: AppTheme.accentOrange),
+                    style: AppTheme.retroStyle(fontSize: 13, color: AppTheme.accentOrange),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     widget.desc,
-                    style: AppTheme.bodyStyle(fontSize: 14, color: AppTheme.primaryTeal),
+                    style: AppTheme.bodyStyle(fontSize: 16, color: AppTheme.primaryTeal),
                   ),
                 ],
               ),
@@ -177,9 +177,9 @@ class _RequestFormScreenState extends State<_RequestFormScreen> {
     }
 
     final body = [
-      '🎵 Request: ${_judul.text.trim()}',
-      if (_penyanyi.text.trim().isNotEmpty) '🎤 Penyanyi: ${_penyanyi.text.trim()}',
-      if (_untuk.text.trim().isNotEmpty) '👤 Untuk: ${_untuk.text.trim()}',
+      '🎵 Song: ${_judul.text.trim()}',
+      if (_penyanyi.text.trim().isNotEmpty) '🎤 Artist: ${_penyanyi.text.trim()}',
+      if (_untuk.text.trim().isNotEmpty) '👤 Dedicated to: ${_untuk.text.trim()}',
       if (_pesan.text.trim().isNotEmpty) '💬 ${_pesan.text.trim()}',
     ].join('\n');
 
@@ -274,7 +274,7 @@ class _RequestFormScreenState extends State<_RequestFormScreen> {
                       : Text(
                           'SEND REQUEST',
                           textAlign: TextAlign.center,
-                          style: AppTheme.retroStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.bold),
+                          style: AppTheme.retroStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
                         ),
                 ),
               ),
@@ -291,16 +291,16 @@ class _RequestFormScreenState extends State<_RequestFormScreen> {
       children: [
         Text(
           label,
-          style: AppTheme.bodyStyle(fontSize: 13, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold),
+          style: AppTheme.bodyStyle(fontSize: 15, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
         TextField(
           controller: ctrl,
           maxLines: maxLines,
-          style: AppTheme.bodyStyle(fontSize: 15, color: Colors.white),
+          style: AppTheme.bodyStyle(fontSize: 17, color: Colors.white),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTheme.bodyStyle(fontSize: 14, color: AppTheme.borderGrey),
+            hintStyle: AppTheme.bodyStyle(fontSize: 16, color: AppTheme.borderGrey),
             filled: true,
             fillColor: AppTheme.cardGrey,
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -458,7 +458,7 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(_error!, textAlign: TextAlign.center, style: AppTheme.bodyStyle(color: AppTheme.primaryTeal, fontSize: 15)),
+          child: Text(_error!, textAlign: TextAlign.center, style: AppTheme.bodyStyle(color: AppTheme.primaryTeal, fontSize: 17)),
         ),
       );
     }
@@ -472,7 +472,7 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
             Text(
               'Start a conversation\nwith Mara FM Studio!',
               textAlign: TextAlign.center,
-              style: AppTheme.bodyStyle(color: AppTheme.primaryTeal, fontSize: 15),
+              style: AppTheme.bodyStyle(color: AppTheme.primaryTeal, fontSize: 17),
             ),
           ],
         ),
@@ -509,13 +509,13 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
           Expanded(
             child: TextField(
               controller: _controller,
-              style: AppTheme.bodyStyle(fontSize: 15),
+              style: AppTheme.bodyStyle(fontSize: 17),
               maxLines: null,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _send(),
               decoration: InputDecoration(
                 hintText: 'Type a message...',
-                hintStyle: AppTheme.bodyStyle(fontSize: 14, color: AppTheme.borderGrey),
+                hintStyle: AppTheme.bodyStyle(fontSize: 16, color: AppTheme.borderGrey),
                 filled: true,
                 fillColor: AppTheme.surfaceGrey,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -584,7 +584,7 @@ class _MessageBubble extends StatelessWidget {
             child: Center(
               child: Text(
                 DateFormat('dd MMM HH:mm').format(message.createdAt.toLocal()),
-                style: AppTheme.bodyStyle(fontSize: 11, color: AppTheme.borderGrey),
+                style: AppTheme.bodyStyle(fontSize: 13, color: AppTheme.borderGrey),
               ),
             ),
           ),
@@ -619,13 +619,13 @@ class _MessageBubble extends StatelessWidget {
                   children: [
                     Text(
                       message.body,
-                      style: AppTheme.bodyStyle(fontSize: 15, color: isStudio ? Colors.white : Colors.black),
+                      style: AppTheme.bodyStyle(fontSize: 17, color: isStudio ? Colors.white : Colors.black),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       timeStr,
                       style: AppTheme.bodyStyle(
-                        fontSize: 11,
+                        fontSize: 13,
                         color: isStudio ? AppTheme.borderGrey : AppTheme.shadowOrange,
                       ),
                     ),

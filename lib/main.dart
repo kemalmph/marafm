@@ -40,9 +40,26 @@ Future<void> main() async {
     OneSignal.Notifications.requestPermission(true);
     OneSignal.Notifications.addClickListener((event) {
       final data = event.notification.additionalData;
-      if (data != null && data['type'] == 'youtube_video') {
-        // Navigate to podcast tab (index 3)
-        MainScreen.navigateTo(3);
+      if (data == null) return;
+
+      final type = data['type'] as String?;
+
+      switch (type) {
+        case 'youtube_video':
+          // Navigate to Podcast tab (index 2 in 0-based indexing)
+          MainScreen.navigateTo(2);
+          break;
+        case 'manual':
+          // Manual notification from studio — open URL if provided, otherwise do nothing
+          // URL handling is already done by OneSignal via the `url` field
+          break;
+        case 'news':
+          // Navigate to News tab (index 3 in 0-based indexing)
+          MainScreen.navigateTo(3);
+          break;
+        default:
+          // Do nothing for unknown types
+          break;
       }
     });
   }

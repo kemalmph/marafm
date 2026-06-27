@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:marquee/marquee.dart';
 import '../theme/app_theme.dart';
 import '../bloc/playback_bloc.dart';
@@ -10,6 +9,7 @@ import '../models/station_metadata.dart';
 import '../modals/share_modal.dart';
 import '../widgets/tactile_container.dart';
 import '../services/liked_songs_service.dart';
+import '../screens/chat_screen.dart';
 import '../bloc/config_bloc.dart';
 import '../bloc/auth_bloc.dart';
 
@@ -505,21 +505,16 @@ class _PlayerTabState extends State<PlayerTab> {
         _buildActionButton(
           icon: Icons.chat_bubble,
           color: AppTheme.accentOrange,
-          onTap: () async {
+          onTap: () {
             final authState = context.read<AuthBloc>().state;
             if (authState is! AuthAuthenticated) {
-              _showSnackBar('LOGIN TO MESSAGE STUDIO AND REGISTER YOUR WHATSAPP NUMBER');
+              _showSnackBar('LOGIN TO CHAT WITH STUDIO');
               return;
             }
-            final whatsapp = authState.profile?['whatsapp_number'] as String? ?? '';
-            if (whatsapp.isEmpty) {
-              _showSnackBar('REGISTER YOUR WHATSAPP NUMBER TO MESSAGE STUDIO');
-              return;
-            }
-            final Uri whatsappUri = Uri.parse('https://wa.me/6285111441067');
-            if (await canLaunchUrl(whatsappUri)) {
-              await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
-            }
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ChatScreen()),
+            );
           },
         ),
       ],

@@ -305,7 +305,7 @@ class _MediaImage extends StatelessWidget {
           Image.network(
             proxyUrl,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
+            errorBuilder: (_, _, _) => Container(
               color: Colors.black,
               child: const Icon(LucideIcons.image, color: AppTheme.borderGrey, size: 32),
             ),

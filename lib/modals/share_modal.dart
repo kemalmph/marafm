@@ -143,7 +143,7 @@ class _ShareModalState extends State<ShareModal> {
                 _buildSmallShareButton(
                   icon: LucideIcons.instagram,
                   color: const Color(0xFFE1306C),
-                  onTap: () => Share.share(_controller.text),
+                  onTap: () => SharePlus.instance.share(ShareParams(text: _controller.text)),
                 ),
                 const SizedBox(width: 8),
                 // Facebook
@@ -159,7 +159,7 @@ class _ShareModalState extends State<ShareModal> {
                 _buildSmallShareButton(
                   icon: LucideIcons.share2,
                   color: AppTheme.primaryTeal,
-                  onTap: () => Share.share(_controller.text),
+                  onTap: () => SharePlus.instance.share(ShareParams(text: _controller.text)),
                 ),
               ],
             ),

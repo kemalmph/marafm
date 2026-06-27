@@ -3,6 +3,8 @@ import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import './theme/app_theme.dart';
 import './screens/main_screen.dart';
 import './services/audio_handler.dart';
@@ -29,6 +31,21 @@ Future<void> main() async {
     url: _supabaseUrl,
     anonKey: _supabaseAnonKey,
   );
+
+  // OneSignal Push Notifications
+  if (!kIsWeb) {
+    OneSignal.initialize(
+      const String.fromEnvironment('ONESIGNAL_APP_ID', defaultValue: '4c7d8443-8af8-4753-a78f-566c831f15ca'),
+    );
+    OneSignal.Notifications.requestPermission(true);
+    OneSignal.Notifications.addClickListener((event) {
+      final data = event.notification.additionalData;
+      if (data != null && data['type'] == 'youtube_video') {
+        // Navigate to podcast tab (index 3)
+        MainScreen.navigateTo(3);
+      }
+    });
+  }
 
   // Configure audio session
   final session = await AudioSession.instance;
@@ -71,7 +88,7 @@ class MaraFMApp extends StatelessWidget {
           ),
         );
       },
-      home: const MainScreen(),
+      home: MainScreen(key: MainScreen.globalKey),
     ));
   }
 }

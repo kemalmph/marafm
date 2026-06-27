@@ -54,6 +54,7 @@ dependencies:
   flutter_native_splash: ^2.4.7
   supabase_flutter: ^2.12.2
   shimmer: ^3.0.0
+  onesignal_flutter: ^5.2.5
 
 dev_dependencies:
   flutter_test:

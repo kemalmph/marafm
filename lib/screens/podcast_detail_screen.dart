@@ -177,7 +177,7 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
             Image.network(
               widget.video.thumbnailUrl,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(color: Colors.black),
+              errorBuilder: (_, _, _) => Container(color: Colors.black),
             ),
             // Darkened overlay
             Container(color: Colors.black.withValues(alpha: 0.4)),

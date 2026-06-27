@@ -20,12 +20,24 @@ import '../widgets/install_pwa_prompt.dart';
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
+  static final GlobalKey<MainScreenState> globalKey = GlobalKey<MainScreenState>();
+
+  static void navigateTo(int tabIndex) {
+    globalKey.currentState?.setTabIndex(tabIndex);
+  }
+
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MainScreen> createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
+class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
+
+  void setTabIndex(int tabIndex) {
+    setState(() {
+      _currentIndex = tabIndex;
+    });
+  }
 
   final List<String> _tabs = ['Player', 'On Air', 'Podcast', 'News'];
 

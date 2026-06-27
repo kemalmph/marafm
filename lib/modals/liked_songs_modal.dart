@@ -60,7 +60,10 @@ class _LikedSongsModalState extends State<LikedSongsModal> {
 
     try {
       if (kIsWeb) {
-        await Share.share(buffer.toString(), subject: 'My Liked Songs on Mara FM');
+        await SharePlus.instance.share(ShareParams(
+          text: buffer.toString(),
+          subject: 'My Liked Songs on Mara FM',
+        ));
         return;
       }
 
@@ -70,13 +73,16 @@ class _LikedSongsModalState extends State<LikedSongsModal> {
       
       await file.writeAsString(buffer.toString());
       
-      await Share.shareXFiles(
-        [XFile(file.path, name: fileName)],
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile(file.path, name: fileName)],
         subject: 'My Liked Songs on Mara FM',
-      );
+      ));
     } catch (e) {
       // Fallback to simple share if file writing fails
-      Share.share(buffer.toString(), subject: 'My Liked Songs on Mara FM');
+      SharePlus.instance.share(ShareParams(
+        text: buffer.toString(),
+        subject: 'My Liked Songs on Mara FM',
+      ));
     }
   }
 

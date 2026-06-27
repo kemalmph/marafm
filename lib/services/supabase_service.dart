@@ -36,7 +36,7 @@ class SupabaseService {
     return List<Map<String, dynamic>>.from(response);
   }
 
-  /// Fetch all non-secret site_config entries as a Map<String, String>.
+  /// Fetch all non-secret site_config entries as a `Map<String, String>`.
   Future<Map<String, String>> getSiteConfig() async {
     final response = await client
         .from('site_config')

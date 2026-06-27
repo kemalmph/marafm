@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../theme/app_theme.dart';
 import '../bloc/playback_bloc.dart';
 import '../bloc/config_bloc.dart';
@@ -182,7 +181,7 @@ class _OnAirTabState extends State<OnAirTab> with SingleTickerProviderStateMixin
                 ),
               ),
               child: Icon(
-                LucideIcons.clock,
+                Icons.access_time,
                 color: isLive ? AppTheme.accentOrange : AppTheme.primaryTeal,
                 size: 16,
               ),

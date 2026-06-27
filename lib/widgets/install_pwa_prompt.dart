@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:js_interop';
 import '../theme/app_theme.dart';
@@ -63,12 +62,12 @@ class InstallPwaPrompt {
             const _InstructionStep(
               number: "1",
               text: "TAP THE 'SHARE' ICON IN SAFARI BROWSER.",
-              icon: LucideIcons.share,
+              icon: Icons.share,
             ),
             const _InstructionStep(
               number: "2",
               text: "SCROLL DOWN AND SELECT 'ADD TO HOME SCREEN'.",
-              icon: LucideIcons.plusSquare,
+              icon: Icons.add_box,
             ),
             const SizedBox(height: 24),
             SizedBox(

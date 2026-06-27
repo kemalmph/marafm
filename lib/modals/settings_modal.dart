@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/config_bloc.dart';
@@ -229,7 +228,7 @@ class _SettingsModalState extends State<SettingsModal> {
                 color: AppTheme.accentOrange,
                 border: Border.all(color: AppTheme.shadowOrange, width: 2),
               ),
-              child: const Icon(LucideIcons.x, color: Colors.black, size: 16),
+              child: const Icon(Icons.close, color: Colors.black, size: 16),
             ),
           ),
         ],
@@ -348,7 +347,7 @@ class _SettingsModalState extends State<SettingsModal> {
                   color: AppTheme.primaryTeal,
                   border: Border.all(color: AppTheme.tealShadow, width: 3),
                 ),
-                child: const Icon(LucideIcons.user, color: Colors.white, size: 24),
+                child: const Icon(Icons.person, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -645,7 +644,7 @@ class _SettingsModalState extends State<SettingsModal> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(LucideIcons.heart, color: AppTheme.accentOrange, size: 16),
+            const Icon(Icons.favorite, color: AppTheme.accentOrange, size: 16),
             const SizedBox(width: 8),
             Text('LIKED SONGS',
                 style: AppTheme.retroStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold)),
@@ -704,7 +703,7 @@ class _SettingsModalState extends State<SettingsModal> {
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
-                        _obscurePassword ? LucideIcons.eyeOff : LucideIcons.eye,
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
                         color: AppTheme.borderGrey, size: 14,
                       ),
                       onPressed: () {

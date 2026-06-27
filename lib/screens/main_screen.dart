@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_theme.dart';
 import '../bloc/auth_bloc.dart';
@@ -130,7 +129,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildArcadeHeaderButton(LucideIcons.user, () {
+            _buildArcadeHeaderButton(Icons.person, () {
               final authBloc = context.read<AuthBloc>();
               final configBloc = context.read<ConfigBloc>();
               showModalBottomSheet(
@@ -195,7 +194,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                   children: [
                     _buildPlaybackButton(
                       context: context,
-                      icon: LucideIcons.play,
+                      icon: Icons.play_arrow,
                       isActive: state.isPlaying || (state.isLoading && !state.isPaused),
                       activeColor: AppTheme.accentOrange,
                       onTap: () {
@@ -205,7 +204,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                     ),
                     _buildPlaybackButton(
                       context: context,
-                      icon: LucideIcons.pause,
+                      icon: Icons.pause,
                       isActive: state.isPaused,
                       activeColor: AppTheme.accentOrange,
                       onTap: () {
@@ -215,7 +214,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                     ),
                     _buildPlaybackButton(
                       context: context,
-                      icon: LucideIcons.square,
+                      icon: Icons.stop,
                       isActive: false,
                       activeColor: AppTheme.primaryTeal,
                       onTap: () {

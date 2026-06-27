@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../theme/app_theme.dart';
 
 class HistoryModal extends StatelessWidget {
@@ -76,7 +75,7 @@ class HistoryModal extends StatelessWidget {
                 color: AppTheme.accentOrange,
                 border: Border.all(color: const Color(0xFFFF7700), width: 2),
               ),
-              child: const Icon(LucideIcons.x, color: Colors.black, size: 16),
+              child: const Icon(Icons.close, color: Colors.black, size: 16),
             ),
           ),
         ],
@@ -95,7 +94,7 @@ class HistoryModal extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.music2, color: AppTheme.primaryTeal, size: 20),
+          const Icon(Icons.music_note, color: AppTheme.primaryTeal, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

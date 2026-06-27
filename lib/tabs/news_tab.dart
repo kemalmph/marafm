@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shimmer/shimmer.dart';
 import '../theme/app_theme.dart';
 import '../services/news_service.dart';
@@ -119,7 +118,7 @@ class _NewsTabState extends State<NewsTab> {
                 ),
                 border: Border.all(color: AppTheme.borderGrey, width: 2),
               ),
-              child: const Icon(LucideIcons.instagram, color: Colors.white, size: 20),
+              child: const Icon(Icons.photo_camera, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 10),
             Column(
@@ -156,7 +155,7 @@ class _NewsTabState extends State<NewsTab> {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Icon(LucideIcons.refreshCw, color: AppTheme.primaryTeal, size: 14),
+                    : const Icon(Icons.refresh, color: AppTheme.primaryTeal, size: 14),
               ),
             ),
           ],
@@ -256,7 +255,7 @@ class _PostCard extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(LucideIcons.instagram, color: Colors.white, size: 10),
+                            const Icon(Icons.photo_camera, color: Colors.white, size: 10),
                             const SizedBox(width: 4),
                             Text(
                               'VIEW POST',
@@ -307,7 +306,7 @@ class _MediaImage extends StatelessWidget {
             fit: BoxFit.cover,
             errorBuilder: (_, _, _) => Container(
               color: Colors.black,
-              child: const Icon(LucideIcons.image, color: AppTheme.borderGrey, size: 32),
+              child: const Icon(Icons.image, color: AppTheme.borderGrey, size: 32),
             ),
             frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
               if (wasSynchronouslyLoaded) return child;
@@ -337,7 +336,7 @@ class _MediaImage extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white54, width: 2),
                 ),
-                child: const Icon(LucideIcons.play, color: Colors.white, size: 22),
+                child: const Icon(Icons.play_arrow, color: Colors.white, size: 22),
               ),
             ),
           // CAROUSEL_ALBUM overlay icon
@@ -348,7 +347,7 @@ class _MediaImage extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 color: Colors.black54,
-                child: const Icon(LucideIcons.layers, color: Colors.white, size: 14),
+                child: const Icon(Icons.layers, color: Colors.white, size: 14),
               ),
             ),
         ],
@@ -368,9 +367,9 @@ class _MediaBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, icon, color) = switch (mediaType) {
-      'VIDEO' => ('VIDEO', LucideIcons.video, AppTheme.accentOrange),
-      'CAROUSEL_ALBUM' => ('ALBUM', LucideIcons.layers, AppTheme.primaryTeal),
-      _ => ('PHOTO', LucideIcons.camera, AppTheme.tealHighlight),
+      'VIDEO' => ('VIDEO', Icons.videocam, AppTheme.accentOrange),
+      'CAROUSEL_ALBUM' => ('ALBUM', Icons.layers, AppTheme.primaryTeal),
+      _ => ('PHOTO', Icons.photo_camera, AppTheme.tealHighlight),
     };
 
     return Row(
@@ -462,7 +461,7 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(LucideIcons.instagram, color: AppTheme.borderGrey, size: 48),
+          const Icon(Icons.photo_camera, color: AppTheme.borderGrey, size: 48),
           const SizedBox(height: 16),
           Text(
             'NO POSTS YET',
@@ -493,7 +492,7 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(LucideIcons.alertCircle, color: AppTheme.accentOrange, size: 44),
+            const Icon(Icons.error_outline, color: AppTheme.accentOrange, size: 44),
             const SizedBox(height: 16),
             Text(
               'FAILED TO LOAD',

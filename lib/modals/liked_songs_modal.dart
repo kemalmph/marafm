@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
@@ -108,7 +107,7 @@ class _LikedSongsModalState extends State<LikedSongsModal> {
                 children: [
                   if (_likedSongs.isNotEmpty)
                     IconButton(
-                      icon: const Icon(LucideIcons.share, color: AppTheme.primaryTeal, size: 20),
+                      icon: const Icon(Icons.share, color: AppTheme.primaryTeal, size: 20),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _shareLikedSongs();
@@ -127,7 +126,7 @@ class _LikedSongsModalState extends State<LikedSongsModal> {
                         color: AppTheme.accentOrange,
                         border: Border.all(color: AppTheme.shadowOrange, width: 2),
                       ),
-                      child: const Icon(LucideIcons.x, color: Colors.black, size: 16),
+                      child: const Icon(Icons.close, color: Colors.black, size: 16),
                     ),
                   ),
                 ],
@@ -160,7 +159,7 @@ class _LikedSongsModalState extends State<LikedSongsModal> {
                                     color: AppTheme.borderGrey,
                                     border: Border.all(color: AppTheme.shadowGrey, width: 2),
                                   ),
-                                  child: const Icon(LucideIcons.music, color: AppTheme.primaryTeal, size: 16),
+                                  child: const Icon(Icons.music_note, color: AppTheme.primaryTeal, size: 16),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -183,7 +182,7 @@ class _LikedSongsModalState extends State<LikedSongsModal> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(LucideIcons.trash2, color: AppTheme.accentOrange, size: 18),
+                                  icon: const Icon(Icons.delete, color: AppTheme.accentOrange, size: 18),
                                   onPressed: () {
                                     HapticFeedback.lightImpact();
                                     _removeSong(song);

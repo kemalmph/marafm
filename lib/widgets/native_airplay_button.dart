@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:output_route_selector/output_route_selector.dart';
 
 class NativeAudioSelector extends StatelessWidget {
@@ -15,7 +14,7 @@ class NativeAudioSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget buttonContent = fallbackChild ?? const Icon(LucideIcons.speaker, color: Colors.white, size: 18);
+    final Widget buttonContent = fallbackChild ?? const Icon(Icons.speaker, color: Colors.white, size: 18);
     
     // Use true native AVRoutePickerView on iOS via PlatformView
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {

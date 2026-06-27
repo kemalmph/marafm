@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../bloc/config_bloc.dart';
 import '../theme/app_theme.dart';
 import '../models/youtube_video.dart';
@@ -67,7 +66,7 @@ class _PodcastTabState extends State<PodcastTab> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(LucideIcons.alertTriangle, color: AppTheme.accentOrange, size: 48),
+            Icon(Icons.warning, color: AppTheme.accentOrange, size: 48),
             const SizedBox(height: 16),
             Text(
               'ERROR LOADING PODCASTS',
@@ -148,7 +147,7 @@ class _PodcastTabState extends State<PodcastTab> {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
                         color: Colors.black,
-                        child: const Icon(LucideIcons.playCircle, color: AppTheme.borderGrey, size: 32),
+                        child: const Icon(Icons.play_circle, color: AppTheme.borderGrey, size: 32),
                       ),
                     ),
                     // Duration Badge
@@ -215,7 +214,7 @@ class _PodcastTabState extends State<PodcastTab> {
                           color: AppTheme.accentOrange,
                           border: Border.all(color: AppTheme.shadowOrange, width: 2),
                         ),
-                        child: const Icon(LucideIcons.play, color: Colors.black, size: 12),
+                        child: const Icon(Icons.play_arrow, color: Colors.black, size: 12),
                       ),
                     ],
                   ),

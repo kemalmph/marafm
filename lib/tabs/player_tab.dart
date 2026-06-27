@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:marquee/marquee.dart';
 import '../theme/app_theme.dart';
@@ -234,7 +233,7 @@ class _PlayerTabState extends State<PlayerTab> {
               'CH: ${state.currentChannel.name.toUpperCase()}',
               style: AppTheme.retroStyle(fontSize: 12, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold),
             ),
-            const Icon(LucideIcons.chevronDown, color: AppTheme.accentOrange, size: 12),
+            const Icon(Icons.keyboard_arrow_down, color: AppTheme.accentOrange, size: 12),
           ],
         ),
       ),
@@ -308,15 +307,15 @@ class _PlayerTabState extends State<PlayerTab> {
                               ),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    isLocked
-                                        ? LucideIcons.lock
-                                        : isCurrent ? LucideIcons.radio : LucideIcons.circle,
-                                    color: isLocked
-                                        ? Colors.grey.shade700
-                                        : isCurrent ? Colors.white : AppTheme.borderGrey,
-                                    size: 16,
-                                  ),
+                                    Icon(
+                                      isLocked
+                                          ? Icons.lock
+                                          : isCurrent ? Icons.radio : Icons.radio_button_unchecked,
+                                      color: isLocked
+                                          ? Colors.grey.shade700
+                                          : isCurrent ? Colors.white : AppTheme.borderGrey,
+                                      size: 16,
+                                    ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
@@ -331,9 +330,9 @@ class _PlayerTabState extends State<PlayerTab> {
                                     ),
                                   ),
                                   if (isCurrent && !isLocked)
-                                    const Icon(LucideIcons.check, color: Colors.white, size: 16),
+                                    const Icon(Icons.check, color: Colors.white, size: 16),
                                   if (isLocked)
-                                    const Icon(LucideIcons.lock, color: AppTheme.borderGrey, size: 14),
+                                    const Icon(Icons.lock, color: AppTheme.borderGrey, size: 14),
                                 ],
                               ),
                             ),
@@ -488,23 +487,23 @@ class _PlayerTabState extends State<PlayerTab> {
       childAspectRatio: 2.0, 
       children: [
         _buildActionButton(
-          icon: LucideIcons.heart,
+          icon: _isLiked ? Icons.favorite : Icons.favorite_border,
           isActive: _isLiked,
           color: AppTheme.accentOrange,
           onTap: () => _toggleLike(state.metadata),
         ),
         _buildActionButton(
-          icon: LucideIcons.share2,
+          icon: Icons.share,
           color: AppTheme.primaryTeal,
           onTap: () => _showShareModal(state.metadata, state.currentChannel.name),
         ),
         _buildActionButton(
-          icon: LucideIcons.history,
+          icon: Icons.history,
           color: AppTheme.accentOrange,
           onTap: () => _showHistoryBottomSheet(state.metadata?.history ?? []),
         ),
         _buildActionButton(
-          icon: LucideIcons.messageSquare,
+          icon: Icons.chat_bubble,
           color: AppTheme.accentOrange,
           onTap: () async {
             final authState = context.read<AuthBloc>().state;
@@ -561,7 +560,7 @@ class _PlayerTabState extends State<PlayerTab> {
                         color: AppTheme.accentOrange,
                         border: Border.all(color: AppTheme.shadowOrange, width: 2),
                       ),
-                      child: const Icon(LucideIcons.x, color: Colors.black, size: 16),
+                      child: const Icon(Icons.close, color: Colors.black, size: 16),
                     ),
                   ),
                 ],
@@ -596,7 +595,7 @@ class _PlayerTabState extends State<PlayerTab> {
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) => Container(
                                       color: Colors.black,
-                                      child: const Icon(LucideIcons.music, color: AppTheme.borderGrey, size: 16),
+                                      child: const Icon(Icons.music_note, color: AppTheme.borderGrey, size: 16),
                                     ),
                                   )
                                 : Container(color: Colors.black),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tactile_container.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -90,7 +89,7 @@ class _ShareModalState extends State<ShareModal> {
                         width: 2,
                       ),
                     ),
-                    child: const Icon(LucideIcons.x, color: Colors.black, size: 16),
+                    child: const Icon(Icons.close, color: Colors.black, size: 16),
                   ),
                 ),
               ],
@@ -132,7 +131,7 @@ class _ShareModalState extends State<ShareModal> {
             Row(
               children: [
                 _buildSmallShareButton(
-                  icon: LucideIcons.twitter,
+                  icon: Icons.send,
                   color: const Color(0xFF1DA1F2),
                   onTap: () => _shareToUrl(
                     'https://twitter.com/intent/tweet?text=${Uri.encodeComponent(_controller.text)}',
@@ -141,14 +140,14 @@ class _ShareModalState extends State<ShareModal> {
                 const SizedBox(width: 8),
                 // Instagram — no deep link for text, use native share sheet
                 _buildSmallShareButton(
-                  icon: LucideIcons.instagram,
+                  icon: Icons.photo_camera,
                   color: const Color(0xFFE1306C),
                   onTap: () => SharePlus.instance.share(ShareParams(text: _controller.text)),
                 ),
                 const SizedBox(width: 8),
                 // Facebook
                 _buildSmallShareButton(
-                  icon: LucideIcons.facebook,
+                  icon: Icons.facebook,
                   color: const Color(0xFF4267B2),
                   onTap: () => _shareToUrl(
                     'https://www.facebook.com/sharer/sharer.php?quote=${Uri.encodeComponent(_controller.text)}&u=${Uri.encodeComponent('https://marafm.com')}',
@@ -157,7 +156,7 @@ class _ShareModalState extends State<ShareModal> {
                 const SizedBox(width: 8),
                 // Native share sheet
                 _buildSmallShareButton(
-                  icon: LucideIcons.share2,
+                  icon: Icons.share,
                   color: AppTheme.primaryTeal,
                   onTap: () => SharePlus.instance.share(ShareParams(text: _controller.text)),
                 ),

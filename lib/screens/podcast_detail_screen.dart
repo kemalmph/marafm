@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
@@ -49,7 +48,7 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
           builder: (context, isPressed) => Container(
             margin: const EdgeInsets.all(8),
             decoration: AppTheme.arcadeButtonDecoration(isPressed: isPressed),
-            child: const Icon(LucideIcons.arrowLeft, color: Colors.white, size: 18),
+            child: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
           ),
         ),
         title: Text(
@@ -140,7 +139,7 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(LucideIcons.externalLink, color: Colors.white, size: 18),
+                          const Icon(Icons.open_in_new, color: Colors.white, size: 18),
                           const SizedBox(width: 8),
                           Text(
                             'OPEN IN YOUTUBE',
@@ -192,7 +191,7 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                     BoxShadow(color: Colors.black54, blurRadius: 8),
                   ],
                 ),
-                child: const Icon(LucideIcons.play, color: Colors.white, size: 32),
+                child: const Icon(Icons.play_arrow, color: Colors.white, size: 32),
               ),
             ),
             // Label

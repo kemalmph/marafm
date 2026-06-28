@@ -111,9 +111,10 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
   }
 
   void _cancel(BuildContext context) {
+    context.read<AuthBloc>().add(AuthLogoutRequested());
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User registration cancelled.')),
+      const SnackBar(content: Text('Registration cancelled.')),
     );
   }
 
@@ -247,11 +248,11 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
               perspective: 0.003,
               diameterRatio: 2.5,
               physics: const FixedExtentScrollPhysics(),
-              onSelectedItemChanged: (i) => setState(() => _birthYear = _currentYear - 13 - i),
+              onSelectedItemChanged: (i) => setState(() => _birthYear = _currentYear - 1 - i),
               childDelegate: ListWheelChildBuilderDelegate(
-                childCount: 80,
+                childCount: 100,
                 builder: (context, index) {
-                  final year = _currentYear - 13 - index;
+                  final year = _currentYear - 1 - index;
                   final selected = _birthYear == year;
                   return Center(
                     child: Text('$year',

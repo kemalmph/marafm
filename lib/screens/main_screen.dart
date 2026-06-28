@@ -69,10 +69,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       final p = authState.profile;
-      if (p == null ||
-          p['gender'] == null ||
-          p['birth_year'] == null ||
-          p['location'] == null) {
+      if (p != null && (p['gender'] == null || p['birth_year'] == null || p['location'] == null)) {
         _showProfileCompletion(context);
       }
     }
@@ -111,10 +108,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         listener: (context, state) {
           if (state is AuthAuthenticated) {
             final p = state.profile;
-            if (p == null ||
-                p['gender'] == null ||
-                p['birth_year'] == null ||
-                p['location'] == null) {
+            if (p != null && (p['gender'] == null || p['birth_year'] == null || p['location'] == null)) {
               _showProfileCompletion(context);
             }
           }

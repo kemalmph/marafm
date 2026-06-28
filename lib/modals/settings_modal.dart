@@ -59,6 +59,7 @@ class _SettingsModalState extends State<SettingsModal> {
   void _loadProfileIntoFields(Map<String, dynamic>? profile) {
     if (_profileLoaded || profile == null) return;
     _profileLoaded = true;
+    _nameController.text = profile['name'] as String? ?? '';
     _whatsappController.text = profile['whatsapp_number'] as String? ?? '';
     _instagramController.text = profile['instagram_username'] as String? ?? '';
     _twitterController.text = profile['twitter_username'] as String? ?? '';

@@ -15,7 +15,6 @@ import '../main.dart'; // For CrtOverlay
 import '../widgets/tactile_container.dart';
 import '../services/audio_handler.dart';
 import '../widgets/install_pwa_prompt.dart';
-import 'chat_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -159,18 +158,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                 ),
               ],
             ),
-            Row(
-              children: [
-                _buildArcadeHeaderButton(Icons.chat_bubble_outline, () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ChatScreen()),
-                  );
-                }),
-                const SizedBox(width: 8),
-                const NativeAudioSelector(),
-              ],
-            ),
+            const NativeAudioSelector(),
           ],
         ),
       );

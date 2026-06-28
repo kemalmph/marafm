@@ -8,7 +8,7 @@ import '../services/chat_service.dart';
 
 // Only two entry points exposed to users
 const _categories = [
-  {'key': 'general', 'label': 'Chat', 'emoji': '💬', 'desc': 'Talk to the studio'},
+  {'key': 'general', 'label': 'Chat Mara FM', 'emoji': '💬', 'desc': 'Talk to the studio'},
   {'key': 'request', 'label': 'Song Request', 'emoji': '🎵', 'desc': 'Request your favorite song'},
 ];
 
@@ -347,7 +347,7 @@ class _ChatThreadScreenState extends State<_ChatThreadScreen> {
   bool _sending = false;
   String? _error;
 
-  String get _categoryLabel => widget.category == 'request' ? '🎵 Request Lagu' : '💬 Chat';
+  String get _categoryLabel => widget.category == 'request' ? '🎵 Song Request' : 'MARA FM';
 
   @override
   void initState() {

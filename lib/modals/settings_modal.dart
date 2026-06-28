@@ -172,6 +172,7 @@ class _SettingsModalState extends State<SettingsModal> {
                           builder: (context, authState) {
                             if (authState is AuthLoading) {
                               return _buildSectionBox('USER PROFILE',
+      titleColor: AppTheme.accentOrange,
                                 const Center(
                                   child: Padding(
                                     padding: EdgeInsets.all(24),
@@ -242,6 +243,7 @@ class _SettingsModalState extends State<SettingsModal> {
     final outerContext = context;
     return _buildSectionBox(
       'USER PROFILE',
+      titleColor: AppTheme.accentOrange,
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -375,6 +377,7 @@ class _SettingsModalState extends State<SettingsModal> {
 
     return _buildSectionBox(
       'USER PROFILE',
+      titleColor: AppTheme.accentOrange,
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

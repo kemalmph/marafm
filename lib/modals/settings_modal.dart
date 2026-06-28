@@ -332,12 +332,6 @@ class _SettingsModalState extends State<SettingsModal> {
             icon: '🔵',
             onTap: () => outerContext.read<AuthBloc>().add(AuthGoogleLoginRequested()),
           ),
-          const SizedBox(height: 10),
-          _buildSocialButton(
-            label: 'CONTINUE WITH APPLE',
-            icon: '⚫',
-            onTap: () => outerContext.read<AuthBloc>().add(AuthAppleLoginRequested()),
-          ),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const _oauthRedirect = 'com.kemalhidayat.marafm://login-callback';
+const _oauthRedirectWeb = 'https://marafm.com';
 
 class AuthService {
   AuthService._();
@@ -38,7 +39,7 @@ class AuthService {
   Future<void> signInWithGoogle() async {
     await _client.auth.signInWithOAuth(
       OAuthProvider.google,
-      redirectTo: kIsWeb ? null : _oauthRedirect,
+      redirectTo: kIsWeb ? _oauthRedirectWeb : _oauthRedirect,
     );
   }
 

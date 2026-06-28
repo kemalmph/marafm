@@ -330,7 +330,7 @@ class _SettingsModalState extends State<SettingsModal> {
           ]),
           const SizedBox(height: 16),
           _buildSocialButton(
-            label: 'CONTINUE WITH GOOGLE',
+            label: 'SIGN IN WITH GOOGLE',
             icon: '🔵',
             onTap: () => outerContext.read<AuthBloc>().add(AuthGoogleLoginRequested()),
           ),
@@ -788,7 +788,6 @@ class _SettingsModalState extends State<SettingsModal> {
       Column(
         children: info.entries.map((e) => _buildInfoRow2(e.key, e.value)).toList(),
       ),
-      titleColor: AppTheme.accentOrange,
     );
   }
 
@@ -802,7 +801,6 @@ class _SettingsModalState extends State<SettingsModal> {
           _buildUrlRow('ADVERTISE', config.advertiseText, config.advertiseUrl),
         ],
       ),
-      titleColor: AppTheme.accentOrange,
     );
   }
 

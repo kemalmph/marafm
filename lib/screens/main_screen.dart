@@ -33,6 +33,7 @@ class MainScreen extends StatefulWidget {
 
 class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
+  bool _profileCompletionShown = false;
 
   void setTabIndex(int tabIndex) {
     setState(() {
@@ -66,6 +67,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   }
 
   void _checkProfileCompletion(BuildContext context) {
+    if (_profileCompletionShown) return;
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       final p = authState.profile;
@@ -76,6 +78,8 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   }
 
   void _showProfileCompletion(BuildContext context) {
+    if (_profileCompletionShown) return;
+    _profileCompletionShown = true;
     final authBloc = context.read<AuthBloc>();
     final state = authBloc.state;
     final name = state is AuthAuthenticated
@@ -106,7 +110,9 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       create: (context) => PlaybackBloc(audioHandler),
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
+          if (state is AuthUnauthenticated) {
+            _profileCompletionShown = false;
+          } else if (state is AuthAuthenticated) {
             final p = state.profile;
             if (p != null && (p['gender'] == null || p['birth_year'] == null || p['location'] == null)) {
               _showProfileCompletion(context);

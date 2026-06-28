@@ -110,14 +110,6 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
     );
   }
 
-  void _cancel(BuildContext context) {
-    context.read<AuthBloc>().add(AuthLogoutRequested());
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Registration cancelled.')),
-    );
-  }
-
   Widget _buildDoneState(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(28),
@@ -162,19 +154,8 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text('COMPLETE YOUR PROFILE',
-                    style: AppTheme.retroStyle(fontSize: 13, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
-              ),
-              GestureDetector(
-                onTap: () => _cancel(context),
-                child: const Icon(Icons.close, color: Colors.white54, size: 20),
-              ),
-            ],
-          ),
+          Text('COMPLETE YOUR PROFILE',
+              style: AppTheme.retroStyle(fontSize: 13, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
           Text('A few more details to personalise your experience.',
               style: AppTheme.bodyStyle(fontSize: 13, color: AppTheme.primaryTeal)),

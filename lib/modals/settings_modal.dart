@@ -589,7 +589,7 @@ class _SettingsModalState extends State<SettingsModal> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('EMAIL',
-                  style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+                  style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               Container(
                 width: double.infinity,
@@ -730,6 +730,7 @@ class _SettingsModalState extends State<SettingsModal> {
           ),
         ],
       ),
+      titleColor: AppTheme.accentOrange,
     );
   }
 
@@ -743,7 +744,7 @@ class _SettingsModalState extends State<SettingsModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('GENDER',
-            style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+            style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
         Container(
           decoration: BoxDecoration(
@@ -843,7 +844,7 @@ class _SettingsModalState extends State<SettingsModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+            style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
         Container(
           decoration: BoxDecoration(

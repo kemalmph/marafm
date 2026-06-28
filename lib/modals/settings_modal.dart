@@ -495,8 +495,7 @@ class _SettingsModalState extends State<SettingsModal> {
 
   Widget _buildProfileEditForm(BuildContext context, AuthAuthenticated state) {
     final outerContext = context;
-    // final profile = state.profile; // removing unused local variable
-
+    final email = state.user.email ?? '';
 
     return _buildSectionBox(
       'EDIT PROFILE',
@@ -506,6 +505,25 @@ class _SettingsModalState extends State<SettingsModal> {
           _buildSectionLabel('BASIC INFO'),
           const SizedBox(height: 8),
           _buildInputField('NAME', 'Display name', _nameController),
+          const SizedBox(height: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('EMAIL',
+                  style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  border: Border.all(color: AppTheme.borderGrey, width: 2),
+                ),
+                child: Text(email,
+                    style: AppTheme.bodyStyle(fontSize: 13, color: Colors.white54)),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           _buildGenderDropdown(),
           const SizedBox(height: 8),
@@ -641,10 +659,9 @@ class _SettingsModalState extends State<SettingsModal> {
                 style: AppTheme.bodyStyle(fontSize: 11, color: AppTheme.borderGrey)),
             style: AppTheme.bodyStyle(fontSize: 11, color: Colors.white),
             items: const [
-              DropdownMenuItem(value: 'male', child: Text('Male')),
-              DropdownMenuItem(value: 'female', child: Text('Female')),
-              DropdownMenuItem(value: 'other', child: Text('Other')),
-              DropdownMenuItem(value: 'prefer_not_to_say', child: Text('Prefer not to say')),
+              DropdownMenuItem(value: 'Male', child: Text('Male')),
+              DropdownMenuItem(value: 'Female', child: Text('Female')),
+              DropdownMenuItem(value: 'Rather not say', child: Text('Rather not say')),
             ],
             onChanged: (value) => setState(() => _selectedGender = value),
           ),

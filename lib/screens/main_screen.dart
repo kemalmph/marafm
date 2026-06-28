@@ -79,12 +79,17 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   void _showProfileCompletion(BuildContext context) {
     final authBloc = context.read<AuthBloc>();
+    final state = authBloc.state;
+    final name = state is AuthAuthenticated
+        ? (state.profile?['name'] as String? ?? state.user.email ?? '')
+        : '';
+    final email = state is AuthAuthenticated ? (state.user.email ?? '') : '';
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => BlocProvider.value(
         value: authBloc,
-        child: const ProfileCompletionModal(),
+        child: ProfileCompletionModal(prefillName: name, prefillEmail: email),
       ),
     );
   }

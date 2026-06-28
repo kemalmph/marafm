@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const _oauthRedirect = 'com.kemalhidayat.marafm://login-callback';
 const _oauthRedirectWeb = 'https://marafm.com';
@@ -51,6 +52,7 @@ class AuthService {
     await _client.auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: kIsWeb ? _oauthRedirectWeb : _oauthRedirect,
+      authScreenLaunchMode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
     );
   }
 

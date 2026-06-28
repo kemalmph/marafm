@@ -16,6 +16,19 @@ class AuthRegisterRequested extends AuthEvent {
 }
 class AuthGoogleLoginRequested extends AuthEvent {}
 class AuthAppleLoginRequested extends AuthEvent {}
+class AuthPasswordRecoveryDetected extends AuthEvent {}
+class AuthForgotPasswordRequested extends AuthEvent {
+  final String email;
+  AuthForgotPasswordRequested(this.email);
+}
+class AuthSetNewPasswordRequested extends AuthEvent {
+  final String newPassword;
+  AuthSetNewPasswordRequested(this.newPassword);
+}
+class AuthChangePasswordRequested extends AuthEvent {
+  final String newPassword;
+  AuthChangePasswordRequested(this.newPassword);
+}
 class AuthLogoutRequested extends AuthEvent {}
 class AuthProfileUpdateRequested extends AuthEvent {
   final String? name, whatsappNumber, instagramUsername, twitterUsername;
@@ -39,6 +52,9 @@ class AuthProfileUpdateRequested extends AuthEvent {
 abstract class AuthState {}
 class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
+class AuthForgotPasswordSent extends AuthState {}
+class AuthPasswordRecovery extends AuthState {}
+class AuthPasswordChanged extends AuthState {}
 class AuthAuthenticated extends AuthState {
   final User user;
   final Map<String, dynamic>? profile;
@@ -71,11 +87,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRegisterRequested>(_onRegister);
     on<AuthGoogleLoginRequested>(_onGoogleLogin);
     on<AuthAppleLoginRequested>(_onAppleLogin);
+    on<AuthPasswordRecoveryDetected>((_, emit) => emit(AuthPasswordRecovery()));
+    on<AuthForgotPasswordRequested>(_onForgotPassword);
+    on<AuthSetNewPasswordRequested>(_onSetNewPassword);
+    on<AuthChangePasswordRequested>(_onChangePassword);
     on<AuthLogoutRequested>(_onLogout);
     on<AuthProfileUpdateRequested>(_onUpdateProfile);
 
     _authSubscription = _authService.authStateChanges.listen((authState) {
-      add(AuthCheckRequested());
+      if (authState.event == AuthChangeEvent.passwordRecovery) {
+        add(AuthPasswordRecoveryDetected());
+      } else {
+        add(AuthCheckRequested());
+      }
     });
 
     add(AuthCheckRequested());
@@ -164,6 +188,37 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // Auth state listener handles the callback when browser returns
     } catch (e) {
       emit(AuthError('Apple sign-in failed. Please try again.'));
+    }
+  }
+
+  Future<void> _onForgotPassword(AuthForgotPasswordRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      await _authService.sendPasswordReset(event.email);
+      emit(AuthForgotPasswordSent());
+    } catch (e) {
+      emit(AuthError('Could not send reset email. Please try again.'));
+    }
+  }
+
+  Future<void> _onSetNewPassword(AuthSetNewPasswordRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      await _authService.updatePassword(event.newPassword);
+      emit(AuthPasswordChanged());
+      add(AuthCheckRequested());
+    } catch (e) {
+      emit(AuthError('Could not update password. Please try again.'));
+    }
+  }
+
+  Future<void> _onChangePassword(AuthChangePasswordRequested event, Emitter<AuthState> emit) async {
+    try {
+      await _authService.updatePassword(event.newPassword);
+      emit(AuthPasswordChanged());
+      add(AuthCheckRequested());
+    } catch (e) {
+      emit(AuthError('Could not update password. Please try again.'));
     }
   }
 

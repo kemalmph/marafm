@@ -25,6 +25,8 @@ class _SettingsModalState extends State<SettingsModal> {
   bool _obscurePassword = true;
 
   // Profile fields
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _whatsappController = TextEditingController();
   final _instagramController = TextEditingController();
   final _twitterController = TextEditingController();
@@ -42,6 +44,8 @@ class _SettingsModalState extends State<SettingsModal> {
     _emailController.dispose();
     _passwordController.dispose();
     _nameController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     _whatsappController.dispose();
     _instagramController.dispose();
     _twitterController.dispose();
@@ -319,6 +323,16 @@ class _SettingsModalState extends State<SettingsModal> {
               ),
             ),
           ),
+          if (!_isRegisterMode) ...[
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () => _showForgotPassword(outerContext),
+              child: Text(
+                'Forgot password?',
+                style: AppTheme.bodyStyle(fontSize: 13, color: AppTheme.primaryTeal),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           Row(children: [
             Expanded(child: Divider(color: AppTheme.borderGrey, thickness: 2)),
@@ -335,6 +349,72 @@ class _SettingsModalState extends State<SettingsModal> {
             onTap: () => outerContext.read<AuthBloc>().add(AuthGoogleLoginRequested()),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showForgotPassword(BuildContext context) {
+    final emailCtrl = TextEditingController();
+    final authBloc = context.read<AuthBloc>();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: authBloc,
+        child: BlocConsumer<AuthBloc, AuthState>(
+          listener: (ctx, state) {
+            if (state is AuthForgotPasswordSent || state is AuthError) {
+              Navigator.of(dialogContext).pop();
+              _showSnackBar(
+                state is AuthForgotPasswordSent
+                    ? 'Reset email sent! Check your inbox.'
+                    : (state as AuthError).message,
+                isError: state is AuthError,
+              );
+            }
+          },
+          builder: (ctx, state) {
+            final loading = state is AuthLoading;
+            return AlertDialog(
+              backgroundColor: AppTheme.backgroundDarkGrey,
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(color: AppTheme.borderGrey, width: 3),
+                borderRadius: BorderRadius.zero,
+              ),
+              title: Text('FORGOT PASSWORD',
+                  style: AppTheme.retroStyle(fontSize: 12, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Enter your email and we\'ll send a reset link.',
+                      style: AppTheme.bodyStyle(fontSize: 13, color: Colors.white70)),
+                  const SizedBox(height: 16),
+                  _buildInputField('EMAIL', 'your@email.com', emailCtrl,
+                      keyboardType: TextInputType.emailAddress),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text('CANCEL', style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.borderGrey)),
+                ),
+                TextButton(
+                  onPressed: loading ? null : () {
+                    final email = emailCtrl.text.trim();
+                    if (email.isEmpty || !email.contains('@')) {
+                      _showSnackBar('Please enter a valid email');
+                      return;
+                    }
+                    ctx.read<AuthBloc>().add(AuthForgotPasswordRequested(email));
+                  },
+                  child: loading
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : Text('SEND', style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -548,6 +628,13 @@ class _SettingsModalState extends State<SettingsModal> {
           _buildInputField('FACEBOOK', 'username or profile URL', _facebookController),
           const SizedBox(height: 8),
           _buildInputField('TIKTOK', '@username', _tiktokController),
+          const SizedBox(height: 16),
+
+          _buildSectionLabel('CHANGE PASSWORD'),
+          const SizedBox(height: 8),
+          _buildInputField('NEW PASSWORD', 'Min. 6 characters', _newPasswordController, isPassword: true),
+          const SizedBox(height: 8),
+          _buildInputField('CONFIRM PASSWORD', 'Repeat new password', _confirmPasswordController, isPassword: true),
           const SizedBox(height: 20),
 
           // Action Buttons
@@ -580,6 +667,21 @@ class _SettingsModalState extends State<SettingsModal> {
                         _showSnackBar('PLEASE ENTER A VALID BIRTH YEAR');
                         return;
                       }
+                    }
+                    final newPass = _newPasswordController.text;
+                    final confirmPass = _confirmPasswordController.text;
+                    if (newPass.isNotEmpty) {
+                      if (newPass.length < 6) {
+                        _showSnackBar('PASSWORD MUST BE AT LEAST 6 CHARACTERS');
+                        return;
+                      }
+                      if (newPass != confirmPass) {
+                        _showSnackBar('PASSWORDS DO NOT MATCH');
+                        return;
+                      }
+                      outerContext.read<AuthBloc>().add(AuthChangePasswordRequested(newPass));
+                      _newPasswordController.clear();
+                      _confirmPasswordController.clear();
                     }
                     outerContext.read<AuthBloc>().add(AuthProfileUpdateRequested(
                       name: _nameController.text.trim(),

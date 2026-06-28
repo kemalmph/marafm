@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_theme.dart';
 import '../bloc/auth_bloc.dart';
+import '../theme/app_theme.dart' show AppTheme;
 import '../bloc/config_bloc.dart';
 import '../bloc/playback_bloc.dart';
 import '../tabs/player_tab.dart';
@@ -94,6 +95,93 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     );
   }
 
+  void _showSetNewPassword(BuildContext context) {
+    final authBloc = context.read<AuthBloc>();
+    final newPassCtrl = TextEditingController();
+    final confirmCtrl = TextEditingController();
+    String? error;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => BlocProvider.value(
+        value: authBloc,
+        child: StatefulBuilder(
+          builder: (ctx, setDialogState) => BlocListener<AuthBloc, AuthState>(
+            listener: (_, state) {
+              if (state is AuthPasswordChanged || state is AuthAuthenticated) {
+                Navigator.of(dialogContext).pop();
+              }
+              if (state is AuthError) {
+                setDialogState(() => error = state.message);
+              }
+            },
+            child: AlertDialog(
+              backgroundColor: AppTheme.backgroundDarkGrey,
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(color: AppTheme.borderGrey, width: 3),
+                borderRadius: BorderRadius.zero,
+              ),
+              title: Text('SET NEW PASSWORD',
+                  style: AppTheme.retroStyle(fontSize: 12, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (error != null) ...[
+                    Text(error!, style: AppTheme.bodyStyle(fontSize: 12, color: Colors.red)),
+                    const SizedBox(height: 12),
+                  ],
+                  TextField(
+                    controller: newPassCtrl,
+                    obscureText: true,
+                    style: AppTheme.bodyStyle(fontSize: 14, color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'New Password',
+                      labelStyle: AppTheme.retroStyle(fontSize: 10, color: AppTheme.primaryTeal),
+                      enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.borderGrey)),
+                      focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.accentOrange)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: confirmCtrl,
+                    obscureText: true,
+                    style: AppTheme.bodyStyle(fontSize: 14, color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Confirm Password',
+                      labelStyle: AppTheme.retroStyle(fontSize: 10, color: AppTheme.primaryTeal),
+                      enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.borderGrey)),
+                      focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.accentOrange)),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    final p = newPassCtrl.text;
+                    final c = confirmCtrl.text;
+                    if (p.length < 6) {
+                      setDialogState(() => error = 'Password must be at least 6 characters.');
+                      return;
+                    }
+                    if (p != c) {
+                      setDialogState(() => error = 'Passwords do not match.');
+                      return;
+                    }
+                    ctx.read<AuthBloc>().add(AuthSetNewPasswordRequested(p));
+                  },
+                  child: Text('SAVE',
+                      style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _onTabTapped(int index) {
     HapticFeedback.selectionClick();
     setState(() {
@@ -116,6 +204,9 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                 p['location'] == null) {
               _showProfileCompletion(context);
             }
+          }
+          if (state is AuthPasswordRecovery) {
+            _showSetNewPassword(context);
           }
         },
         child: Scaffold(

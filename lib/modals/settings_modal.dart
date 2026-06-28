@@ -353,50 +353,6 @@ class _SettingsModalState extends State<SettingsModal> {
     );
   }
 
-  void _showPasswordResult(BuildContext context, String password) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppTheme.backgroundDarkGrey,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(color: AppTheme.borderGrey, width: 3),
-          borderRadius: BorderRadius.zero,
-        ),
-        title: Text('YOUR NEW PASSWORD',
-            style: AppTheme.retroStyle(fontSize: 12, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Please save this temporary password and use it to log in:',
-                style: AppTheme.bodyStyle(fontSize: 13, color: Colors.white70)),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              color: AppTheme.cardGrey,
-              child: SelectableText(
-                password,
-                style: AppTheme.retroStyle(fontSize: 16, color: AppTheme.accentOrange, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text('We recommend changing it after logging in.',
-                style: AppTheme.bodyStyle(fontSize: 12, color: Colors.white38)),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('GOT IT',
-                style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showForgotPassword(BuildContext context) {
     final emailCtrl = TextEditingController();
     final authBloc = context.read<AuthBloc>();
@@ -408,16 +364,11 @@ class _SettingsModalState extends State<SettingsModal> {
           listener: (ctx, state) {
             if (state is AuthForgotPasswordSent) {
               Navigator.of(dialogContext).pop();
-              final pwd = state.temporaryPassword;
-              if (pwd != null) {
-                _showPasswordResult(ctx, pwd);
-              } else {
-                _showSnackBar('If that email is registered, a new password has been set.', isError: false);
-              }
+              _showSnackBar('Check your email for the reset link.', isError: false);
             }
             if (state is AuthError) {
               Navigator.of(dialogContext).pop();
-              _showSnackBar((state).message, isError: true);
+              _showSnackBar(state.message, isError: true);
             }
           },
           builder: (ctx, state) {

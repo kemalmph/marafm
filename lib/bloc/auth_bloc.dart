@@ -171,9 +171,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       await _authService.signInWithGoogle();
-      // Auth state listener handles the callback when browser returns
     } catch (e) {
-      emit(AuthError('Google sign-in failed. Please try again.'));
+      // On mobile, the deep-link redirect causes signInWithOAuth to throw
+      // even on success. Only revert to unauthenticated if not actually logged in.
+      if (!_authService.isLoggedIn) {
+        emit(AuthUnauthenticated());
+      }
+      // If logged in, auth state listener fires AuthCheckRequested → AuthAuthenticated
     }
   }
 

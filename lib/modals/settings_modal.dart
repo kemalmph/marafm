@@ -788,6 +788,7 @@ class _SettingsModalState extends State<SettingsModal> {
       Column(
         children: info.entries.map((e) => _buildInfoRow2(e.key, e.value)).toList(),
       ),
+      titleColor: AppTheme.accentOrange,
     );
   }
 
@@ -801,6 +802,7 @@ class _SettingsModalState extends State<SettingsModal> {
           _buildUrlRow('ADVERTISE', config.advertiseText, config.advertiseUrl),
         ],
       ),
+      titleColor: AppTheme.accentOrange,
     );
   }
 

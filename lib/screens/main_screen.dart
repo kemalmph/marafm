@@ -15,6 +15,7 @@ import '../main.dart'; // For CrtOverlay
 import '../widgets/tactile_container.dart';
 import '../services/audio_handler.dart';
 import '../widgets/install_pwa_prompt.dart';
+import '../modals/profile_completion_modal.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -46,6 +47,7 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       InstallPwaPrompt.checkAndShow(context);
+      _checkProfileCompletion(context);
     });
   }
 
@@ -62,6 +64,31 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     }
   }
 
+  void _checkProfileCompletion(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      final p = authState.profile;
+      if (p == null ||
+          p['gender'] == null ||
+          p['birth_year'] == null ||
+          p['location'] == null) {
+        _showProfileCompletion(context);
+      }
+    }
+  }
+
+  void _showProfileCompletion(BuildContext context) {
+    final authBloc = context.read<AuthBloc>();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => BlocProvider.value(
+        value: authBloc,
+        child: const ProfileCompletionModal(),
+      ),
+    );
+  }
+
   void _onTabTapped(int index) {
     HapticFeedback.selectionClick();
     setState(() {
@@ -74,7 +101,19 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     final audioHandler = (context.findAncestorWidgetOfExactType<MaraFMApp>()?.audioHandler as MyAudioHandler);
     return BlocProvider(
       create: (context) => PlaybackBloc(audioHandler),
-      child: Scaffold(
+      child: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthAuthenticated) {
+            final p = state.profile;
+            if (p == null ||
+                p['gender'] == null ||
+                p['birth_year'] == null ||
+                p['location'] == null) {
+              _showProfileCompletion(context);
+            }
+          }
+        },
+        child: Scaffold(
         backgroundColor: Colors.black,
         body: Center(
           child: ConstrainedBox(
@@ -118,8 +157,10 @@ class MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           ),
         ),
       ),
+      ),
     );
   }
+
 
   Widget _buildHeader() {
     return Builder(builder: (context) {

@@ -102,7 +102,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onCheck(AuthCheckRequested event, Emitter<AuthState> emit) async {
-    if (state is AuthLoading) return;
     if (_authService.isLoggedIn) {
       final profile = await _authService.getProfile();
       emit(AuthAuthenticated(user: _authService.currentUser!, profile: profile));

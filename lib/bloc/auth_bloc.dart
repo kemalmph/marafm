@@ -53,7 +53,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthService _authService = AuthService.instance;
   StreamSubscription? _authSubscription;
 
-  AuthBloc() : super(AuthInitial()) {
+  // Resolve synchronously from the persisted session so the UI never
+  // flashes "please login" on cold start when the user is already logged in.
+  static AuthState _resolveInitialState() {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) {
+      return AuthAuthenticated(user: session.user, profile: null);
+    }
+    return AuthUnauthenticated();
+  }
+
+  AuthBloc() : super(_resolveInitialState()) {
     on<AuthCheckRequested>(_onCheck);
     on<AuthLoginRequested>(_onLogin);
     on<AuthRegisterRequested>(_onRegister);
@@ -68,7 +78,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onCheck(AuthCheckRequested event, Emitter<AuthState> emit) async {
-    // Don't interrupt an in-progress login/register
     if (state is AuthLoading) return;
     if (_authService.isLoggedIn) {
       final profile = await _authService.getProfile();

@@ -184,7 +184,7 @@ class ConfigService {
                 metadataUrl: (r['metadata_url'] as String?),
                 genre:       (r['genre']        as String?) ?? '',
                 description: (r['description']  as String?) ?? '',
-                website:     (r['website']      as String?) ?? '',
+                website:     (r['website_url']   as String?) ?? '',
                 channelType: (r['channel_type'] as String?) ?? 'external',
               )).toList()
           : defaultConfig.channels;

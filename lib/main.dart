@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:app_links/app_links.dart';
 import './theme/app_theme.dart';
 import './screens/main_screen.dart';
 import './services/audio_handler.dart';
@@ -30,7 +31,18 @@ Future<void> main() async {
   await Supabase.initialize(
     url: _supabaseUrl,
     anonKey: _supabaseAnonKey,
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+    ),
   );
+
+  // Deep link handler for OAuth callbacks (Google Sign-In, password reset)
+  if (!kIsWeb) {
+    final appLinks = AppLinks();
+    appLinks.uriLinkStream.listen((uri) {
+      Supabase.instance.client.auth.getSessionFromUrl(uri);
+    });
+  }
 
   // OneSignal Push Notifications
   if (!kIsWeb) {

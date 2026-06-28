@@ -70,5 +70,20 @@
 		</array>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.kemalhidayat.marafm</string>
+				</array>
+			</dict>
+		</array>
+		<key>NSUserTrackingUsageDescription</key>
+		<string>Mara FM menggunakan informasi ini untuk memberikan notifikasi yang relevan tentang program dan konten radio.</string>
+		<key>NSAppleMusicUsageDescription</key>
+		<string>Mara FM memerlukan akses ini untuk memutar audio radio di perangkat Anda.</string>
 	</dict>
 </plist>

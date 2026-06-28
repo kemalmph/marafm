@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+const _oauthRedirect = 'com.kemalhidayat.marafm://login-callback';
 
 class AuthService {
   AuthService._();
@@ -29,6 +32,20 @@ class AuthService {
     return await _client.auth.signInWithPassword(
       email: email,
       password: password,
+    );
+  }
+
+  Future<void> signInWithGoogle() async {
+    await _client.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: kIsWeb ? null : _oauthRedirect,
+    );
+  }
+
+  Future<void> signInWithApple() async {
+    await _client.auth.signInWithOAuth(
+      OAuthProvider.apple,
+      redirectTo: kIsWeb ? null : _oauthRedirect,
     );
   }
 

@@ -317,7 +317,52 @@ class _SettingsModalState extends State<SettingsModal> {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          Row(children: [
+            Expanded(child: Divider(color: AppTheme.borderGrey, thickness: 2)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Text('OR', style: AppTheme.retroStyle(fontSize: 9, color: AppTheme.borderGrey)),
+            ),
+            Expanded(child: Divider(color: AppTheme.borderGrey, thickness: 2)),
+          ]),
+          const SizedBox(height: 16),
+          _buildSocialButton(
+            label: 'CONTINUE WITH GOOGLE',
+            icon: '🔵',
+            onTap: () => outerContext.read<AuthBloc>().add(AuthGoogleLoginRequested()),
+          ),
+          const SizedBox(height: 10),
+          _buildSocialButton(
+            label: 'CONTINUE WITH APPLE',
+            icon: '⚫',
+            onTap: () => outerContext.read<AuthBloc>().add(AuthAppleLoginRequested()),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSocialButton({required String label, required String icon, required VoidCallback onTap}) {
+    return TactileContainer(
+      onTap: onTap,
+      builder: (_, isPressed) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 11),
+        decoration: AppTheme.controlButtonDecoration(
+          color: AppTheme.borderGrey,
+          isPressed: isPressed,
+        ),
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(icon, style: const TextStyle(fontSize: 14)),
+              const SizedBox(width: 8),
+              Text(label, style: AppTheme.retroStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
       ),
     );
   }

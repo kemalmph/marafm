@@ -14,6 +14,8 @@ class AuthRegisterRequested extends AuthEvent {
   final String email, password, name;
   AuthRegisterRequested({required this.email, required this.password, required this.name});
 }
+class AuthGoogleLoginRequested extends AuthEvent {}
+class AuthAppleLoginRequested extends AuthEvent {}
 class AuthLogoutRequested extends AuthEvent {}
 class AuthProfileUpdateRequested extends AuthEvent {
   final String? name, whatsappNumber, instagramUsername, twitterUsername;
@@ -67,6 +69,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onCheck);
     on<AuthLoginRequested>(_onLogin);
     on<AuthRegisterRequested>(_onRegister);
+    on<AuthGoogleLoginRequested>(_onGoogleLogin);
+    on<AuthAppleLoginRequested>(_onAppleLogin);
     on<AuthLogoutRequested>(_onLogout);
     on<AuthProfileUpdateRequested>(_onUpdateProfile);
 
@@ -140,6 +144,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e) {
       emit(AuthError('Register error: ${e.runtimeType}: $e'));
+    }
+  }
+
+  Future<void> _onGoogleLogin(AuthGoogleLoginRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      await _authService.signInWithGoogle();
+      // Auth state listener handles the callback when browser returns
+    } catch (e) {
+      emit(AuthError('Google sign-in failed. Please try again.'));
+    }
+  }
+
+  Future<void> _onAppleLogin(AuthAppleLoginRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      await _authService.signInWithApple();
+      // Auth state listener handles the callback when browser returns
+    } catch (e) {
+      emit(AuthError('Apple sign-in failed. Please try again.'));
     }
   }
 

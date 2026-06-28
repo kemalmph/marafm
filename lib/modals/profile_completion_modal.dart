@@ -93,7 +93,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         }
       },
       child: PopScope(
-        canPop: false,
+        canPop: true,
         child: Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
@@ -107,6 +107,13 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
           ),
         ),
       ),
+    );
+  }
+
+  void _cancel(BuildContext context) {
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('User registration cancelled.')),
     );
   }
 
@@ -154,8 +161,19 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('COMPLETE YOUR PROFILE',
-              style: AppTheme.retroStyle(fontSize: 13, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text('COMPLETE YOUR PROFILE',
+                    style: AppTheme.retroStyle(fontSize: 13, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+              ),
+              GestureDetector(
+                onTap: () => _cancel(context),
+                child: const Icon(Icons.close, color: Colors.white54, size: 20),
+              ),
+            ],
+          ),
           const SizedBox(height: 6),
           Text('A few more details to personalise your experience.',
               style: AppTheme.bodyStyle(fontSize: 13, color: AppTheme.primaryTeal)),

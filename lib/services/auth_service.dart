@@ -36,11 +36,14 @@ class AuthService {
     );
   }
 
-  Future<void> sendPasswordReset(String email) async {
-    await _client.auth.resetPasswordForEmail(
-      email,
-      redirectTo: kIsWeb ? _oauthRedirectWeb : _oauthRedirect,
+  // Returns the new temporary password, or null if email not found.
+  Future<String?> resetPasswordViaAdmin(String email) async {
+    final res = await _client.functions.invoke(
+      'reset-password',
+      body: {'email': email},
     );
+    final data = res.data as Map<String, dynamic>?;
+    return data?['password'] as String?;
   }
 
   Future<void> updatePassword(String newPassword) async {

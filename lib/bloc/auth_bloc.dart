@@ -52,7 +52,10 @@ class AuthProfileUpdateRequested extends AuthEvent {
 abstract class AuthState {}
 class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
-class AuthForgotPasswordSent extends AuthState {}
+class AuthForgotPasswordSent extends AuthState {
+  final String? temporaryPassword;
+  AuthForgotPasswordSent({this.temporaryPassword});
+}
 class AuthPasswordRecovery extends AuthState {}
 class AuthPasswordChanged extends AuthState {}
 class AuthAuthenticated extends AuthState {
@@ -95,11 +98,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthProfileUpdateRequested>(_onUpdateProfile);
 
     _authSubscription = _authService.authStateChanges.listen((authState) {
-      if (authState.event == AuthChangeEvent.passwordRecovery) {
-        add(AuthPasswordRecoveryDetected());
-      } else {
-        add(AuthCheckRequested());
-      }
+      add(AuthCheckRequested());
     });
 
     add(AuthCheckRequested());
@@ -194,10 +193,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onForgotPassword(AuthForgotPasswordRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      await _authService.sendPasswordReset(event.email);
-      emit(AuthForgotPasswordSent());
+      final newPassword = await _authService.resetPasswordViaAdmin(event.email);
+      emit(AuthForgotPasswordSent(temporaryPassword: newPassword));
     } catch (e) {
-      emit(AuthError('Could not send reset email. Please try again.'));
+      emit(AuthError('Could not reset password. Please try again.'));
     }
   }
 

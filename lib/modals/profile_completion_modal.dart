@@ -61,7 +61,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
       return;
     }
     if (location.isEmpty) {
-      setState(() => _error = 'Please enter your city / location.');
+      setState(() => _error = 'Please enter your hometown.');
       return;
     }
 
@@ -250,7 +250,7 @@ class _ProfileCompletionModalState extends State<ProfileCompletionModal> {
           const SizedBox(height: 16),
 
           // Location
-          Text('CITY / LOCATION *', style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.accentOrange)),
+          Text('HOMETOWN *', style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.accentOrange)),
           const SizedBox(height: 8),
           _buildTextField(_locationController, 'e.g. Bandung'),
           const SizedBox(height: 20),

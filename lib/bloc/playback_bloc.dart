@@ -205,7 +205,13 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
     try {
       emit(state.copyWith(isLoading: true, isPaused: false));
       final streamUrl = state.currentChannel.streamUrl;
-      await _audioHandler.playFromUri(Uri.parse(streamUrl));
+      // Disable ICY metadata injection for channels that use a dedicated metadata API.
+      // ICY blocks embedded in AAC streams corrupt frame boundaries on iOS AVPlayer,
+      // causing audio to rewind a few seconds after playback starts.
+      final headers = <String, String>{
+        if (state.currentChannel.metadataUrl != null) 'Icy-MetaData': '0',
+      };
+      await _audioHandler.playFromUri(Uri.parse(streamUrl), {'headers': headers});
       
       emit(state.copyWith(activeStreamUrl: streamUrl));
       

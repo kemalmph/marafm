@@ -1,8 +1,19 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
 class MyAudioHandler extends BaseAudioHandler {
-  final _player = AudioPlayer();
+  final _player = AudioPlayer(
+    audioLoadConfiguration: kIsWeb
+        ? null
+        : const AudioLoadConfiguration(
+            darwinLoadControl: DarwinLoadControl(
+              // Small buffer prevents AVPlayer from seeking to "live edge" after buffering
+              preferredForwardBufferDuration: Duration(seconds: 3),
+              automaticallyWaitsToMinimizeStalling: false,
+            ),
+          ),
+  );
 
   Stream<IcyMetadata?> get icyMetadataStream => _player.icyMetadataStream;
 
@@ -25,7 +36,8 @@ class MyAudioHandler extends BaseAudioHandler {
   @override
   Future<void> playFromUri(Uri uri, [Map<String, dynamic>? extras]) async {
     try {
-      await _player.setAudioSource(AudioSource.uri(uri));
+      final headers = extras?['headers'] as Map<String, String>? ?? {};
+      await _player.setAudioSource(AudioSource.uri(uri, headers: headers));
       return play();
     } catch (e) {
       // Broadcast error through playback state
@@ -44,11 +56,7 @@ class MyAudioHandler extends BaseAudioHandler {
         MediaControl.play,
         MediaControl.stop,
       ],
-      systemActions: const {
-        MediaAction.seek,
-        MediaAction.seekForward,
-        MediaAction.seekBackward,
-      },
+      systemActions: const {},
       androidCompactActionIndices: const [0, 1, 2],
       processingState: const {
         ProcessingState.idle: AudioProcessingState.idle,
@@ -58,8 +66,8 @@ class MyAudioHandler extends BaseAudioHandler {
         ProcessingState.completed: AudioProcessingState.completed,
       }[_player.processingState]!,
       playing: _player.playing,
-      updatePosition: _player.position,
-      bufferedPosition: _player.bufferedPosition,
+      updatePosition: Duration.zero,
+      bufferedPosition: Duration.zero,
       speed: _player.speed,
       queueIndex: event.currentIndex,
     );

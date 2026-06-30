@@ -107,8 +107,8 @@ class MaraFMApp extends StatelessWidget {
         theme: AppTheme.theme,
         debugShowCheckedModeBanner: false,
       builder: (context, child) {
-        return Container(
-          color: Colors.black, // Add a background color for the margins
+        Widget content = Container(
+          color: Colors.black,
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
@@ -116,6 +116,16 @@ class MaraFMApp extends StatelessWidget {
             ),
           ),
         );
+        if (defaultTargetPlatform == TargetPlatform.android) {
+          final mq = MediaQuery.of(context);
+          content = MediaQuery(
+            data: mq.copyWith(
+              textScaler: TextScaler.linear((mq.textScaler.scale(1.0) * 0.88).clamp(0.7, 1.1)),
+            ),
+            child: content,
+          );
+        }
+        return content;
       },
       home: MainScreen(key: MainScreen.globalKey),
     ));

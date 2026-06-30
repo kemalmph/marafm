@@ -85,5 +85,11 @@
 		<string>Mara FM menggunakan informasi ini untuk memberikan notifikasi yang relevan tentang program dan konten radio.</string>
 		<key>NSAppleMusicUsageDescription</key>
 		<string>Mara FM memerlukan akses ini untuk memutar audio radio di perangkat Anda.</string>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Mara FM does not use the microphone. This permission is required by an included framework.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Mara FM does not use your location. This permission is required by an included framework.</string>
 	</dict>
 </plist>

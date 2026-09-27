@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/auth_service.dart';
 
 // Events
@@ -30,6 +33,7 @@ class AuthChangePasswordRequested extends AuthEvent {
   AuthChangePasswordRequested(this.newPassword);
 }
 class AuthLogoutRequested extends AuthEvent {}
+class AuthDeleteAccountRequested extends AuthEvent {}
 class AuthProfileUpdateRequested extends AuthEvent {
   final String? name, whatsappNumber, instagramUsername, twitterUsername;
   final String? gender, location, facebookUsername, tiktokUsername;
@@ -61,6 +65,7 @@ class AuthAuthenticated extends AuthState {
   AuthAuthenticated({required this.user, this.profile});
 }
 class AuthUnauthenticated extends AuthState {}
+class AuthAccountDeleted extends AuthUnauthenticated {}
 class AuthError extends AuthState {
   final String message;
   AuthError(this.message);
@@ -92,9 +97,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSetNewPasswordRequested>(_onSetNewPassword);
     on<AuthChangePasswordRequested>(_onChangePassword);
     on<AuthLogoutRequested>(_onLogout);
+    on<AuthDeleteAccountRequested>(_onDeleteAccount);
     on<AuthProfileUpdateRequested>(_onUpdateProfile);
 
     _authSubscription = _authService.authStateChanges.listen((authState) {
+      // The Google OAuth redirect does not dismiss the in-app browser sheet on its own.
+      if (!kIsWeb && authState.event == AuthChangeEvent.signedIn) {
+        closeInAppWebView();
+      }
       add(AuthCheckRequested());
     });
 
@@ -170,13 +180,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       await _authService.signInWithGoogle();
-    } catch (e) {
-      // On mobile, the deep-link redirect causes signInWithOAuth to throw
-      // even on success. Only revert to unauthenticated if not actually logged in.
-      if (!_authService.isLoggedIn) {
-        emit(AuthUnauthenticated());
-      }
-      // If logged in, auth state listener fires AuthCheckRequested → AuthAuthenticated
+    } catch (_) {}
+    // The sign-in sheet returns immediately and has no dismiss callback, so reset the
+    // form in case the user closes it; the auth listener emits AuthAuthenticated on success.
+    if (!_authService.isLoggedIn) {
+      emit(AuthUnauthenticated());
     }
   }
 
@@ -184,7 +192,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       await _authService.signInWithApple();
-      // Auth state listener handles the callback when browser returns
+      // Re-fetch so the profile reflects the name saved after sign-in.
+      add(AuthCheckRequested());
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        emit(AuthUnauthenticated());
+      } else {
+        emit(AuthError('Apple sign-in failed: ${e.message}'));
+      }
+    } on AuthException catch (e) {
+      emit(AuthError('Apple sign-in failed: ${e.message}'));
     } catch (e) {
       emit(AuthError('Apple sign-in failed. Please try again.'));
     }
@@ -224,6 +241,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onLogout(AuthLogoutRequested event, Emitter<AuthState> emit) async {
     await _authService.logout();
     emit(AuthUnauthenticated());
+  }
+
+  Future<void> _onDeleteAccount(AuthDeleteAccountRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      await _authService.deleteAccount();
+      emit(AuthAccountDeleted());
+    } catch (e) {
+      emit(AuthError('Could not delete account. Please try again.'));
+    }
   }
 
   Future<void> _onUpdateProfile(AuthProfileUpdateRequested event, Emitter<AuthState> emit) async {

@@ -42,7 +42,7 @@ class ChatScreen extends StatelessWidget {
       body: ListView.separated(
         padding: const EdgeInsets.all(20),
         itemCount: _categories.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        separatorBuilder: (_, _) => const SizedBox(height: 16),
         itemBuilder: (context, index) {
           final cat = _categories[index];
           return _CategoryTile(

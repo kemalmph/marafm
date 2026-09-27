@@ -1,6 +1,8 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 const _oauthRedirect = 'com.kemalhidayat.marafm://login-callback';
 const _oauthRedirectWeb = 'https://marafm.com';
@@ -52,15 +54,42 @@ class AuthService {
     await _client.auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: kIsWeb ? _oauthRedirectWeb : _oauthRedirect,
-      authScreenLaunchMode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
+      authScreenLaunchMode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.inAppBrowserView,
     );
   }
 
   Future<void> signInWithApple() async {
-    await _client.auth.signInWithOAuth(
-      OAuthProvider.apple,
-      redirectTo: kIsWeb ? null : _oauthRedirect,
+    final rawNonce = _client.auth.generateRawNonce();
+    final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+    final credential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: hashedNonce,
     );
+
+    final idToken = credential.identityToken;
+    if (idToken == null) {
+      throw const AuthException('Apple Sign-In failed: missing identity token.');
+    }
+
+    await _client.auth.signInWithIdToken(
+      provider: OAuthProvider.apple,
+      idToken: idToken,
+      nonce: rawNonce,
+    );
+
+    // Apple only returns the name on the very first authorization, so persist it now.
+    final fullName = [credential.givenName, credential.familyName]
+        .whereType<String>()
+        .where((s) => s.trim().isNotEmpty)
+        .join(' ');
+    if (fullName.isNotEmpty) {
+      await _client.auth.updateUser(UserAttributes(data: {'name': fullName}));
+      await updateProfile(name: fullName);
+    }
   }
 
   Future<void> logout() async {
@@ -98,6 +127,12 @@ class AuthService {
           .update(updates)
           .eq('id', userId);
     }
+  }
+
+  Future<void> deleteAccount() async {
+    if (currentUser == null) return;
+    await _client.functions.invoke('delete-account');
+    await logout();
   }
 
   Future<Map<String, dynamic>?> getProfile() async {

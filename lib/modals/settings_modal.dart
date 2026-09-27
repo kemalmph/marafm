@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/config_bloc.dart';
@@ -169,6 +171,11 @@ class _SettingsModalState extends State<SettingsModal> {
                           listener: (context, state) {
                             if (state is AuthError) {
                               _showSnackBar(state.message.toUpperCase());
+                            }
+                            if (state is AuthAccountDeleted) {
+                              _profileLoaded = false;
+                              _isEditMode = false;
+                              _showSnackBar('YOUR ACCOUNT HAS BEEN DELETED', isError: false);
                             }
                             if (state is AuthAuthenticated) {
                               _loadProfileIntoFields(state.profile);
@@ -344,6 +351,12 @@ class _SettingsModalState extends State<SettingsModal> {
             Expanded(child: Divider(color: AppTheme.borderGrey, thickness: 2)),
           ]),
           const SizedBox(height: 16),
+          if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) ...[
+            _buildAppleButton(
+              onTap: () => outerContext.read<AuthBloc>().add(AuthAppleLoginRequested()),
+            ),
+            const SizedBox(height: 8),
+          ],
           _buildSocialButton(
             label: 'SIGN IN WITH GOOGLE',
             icon: '🔵',
@@ -414,6 +427,39 @@ class _SettingsModalState extends State<SettingsModal> {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+
+  // Apple's guidelines for custom buttons: official logo, black or white fill, and the exact
+  // "Sign in with Apple" title in the system font, so this keeps the 3D frame but not the retro font.
+  Widget _buildAppleButton({required VoidCallback onTap}) {
+    return TactileContainer(
+      onTap: onTap,
+      builder: (_, isPressed) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 11),
+        decoration: AppTheme.controlButtonDecoration(
+          color: Colors.white,
+          isPressed: isPressed,
+        ),
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 13,
+                height: 16,
+                child: CustomPaint(painter: AppleLogoPainter(color: Colors.black)),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Sign in with Apple',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -537,6 +583,56 @@ class _SettingsModalState extends State<SettingsModal> {
                     style: AppTheme.retroStyle(fontSize: 12, color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
               ),
             ),
+          ),
+          const SizedBox(height: 8),
+          TactileContainer(
+            onTap: () => _showDeleteAccountConfirm(context),
+            builder: (_, isPressed) => Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: AppTheme.controlButtonDecoration(
+                color: Colors.red.shade900,
+                isPressed: isPressed,
+              ),
+              child: Center(
+                child: Text('DELETE ACCOUNT',
+                    style: AppTheme.retroStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountConfirm(BuildContext context) {
+    final authBloc = context.read<AuthBloc>();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppTheme.backgroundDarkGrey,
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(color: AppTheme.borderGrey, width: 3),
+          borderRadius: BorderRadius.zero,
+        ),
+        title: Text('DELETE ACCOUNT',
+            style: AppTheme.retroStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.bold)),
+        content: Text(
+          'This action is permanent. Your account and all associated data will be deleted and cannot be recovered. Continue?',
+          style: AppTheme.bodyStyle(fontSize: 13, color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text('CANCEL', style: AppTheme.retroStyle(fontSize: 10, color: AppTheme.borderGrey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              authBloc.add(AuthDeleteAccountRequested());
+            },
+            child: Text('DELETE',
+                style: AppTheme.retroStyle(fontSize: 10, color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

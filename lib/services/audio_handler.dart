@@ -57,8 +57,15 @@ class MyAudioHandler extends BaseAudioHandler {
 
   bool _shouldResumeAfterInterruption = false;
 
+  // Every play path (app button, lock screen, headphones) must re-arm auto-resume and
+  // reactivate the session, since iOS may have deactivated it while idle or interrupted.
   @override
-  Future<void> play() => _player.play();
+  Future<void> play() async {
+    _shouldResumeAfterInterruption = true;
+    final session = await AudioSession.instance;
+    await session.setActive(true);
+    await _player.play();
+  }
 
   @override
   Future<void> pause() {
@@ -78,13 +85,6 @@ class MyAudioHandler extends BaseAudioHandler {
   @override
   Future<void> playFromUri(Uri uri, [Map<String, dynamic>? extras]) async {
     try {
-      _shouldResumeAfterInterruption = true;
-      // Force-reactivate the audio session every time Play is pressed.
-      // On iOS, if the session went inactive (interruption, or the OS
-      // reclaiming it after a long background period), just_audio can
-      // otherwise report "playing" with no actual sound.
-      final session = await AudioSession.instance;
-      await session.setActive(true);
       final headers = extras?['headers'] as Map<String, String>? ?? {};
       await _player.setAudioSource(AudioSource.uri(uri, headers: headers));
       return play();

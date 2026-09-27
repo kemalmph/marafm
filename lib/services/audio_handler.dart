@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -19,16 +20,57 @@ class MyAudioHandler extends BaseAudioHandler {
 
   MyAudioHandler() {
     _player.playbackEventStream.map(_transformEvent).pipe(playbackState);
+    _listenForInterruptions();
   }
+
+  // Reactivate/resume playback when an iOS/Android audio interruption ends
+  // (phone call, Siri, another app's audio, or the OS suspending the
+  // session after the app has been backgrounded for a while). Without this,
+  // the AVAudioSession can stay inactive even though just_audio reports
+  // "playing", so pressing Play again silently produces no sound until the
+  // app is force-closed and reopened.
+  void _listenForInterruptions() async {
+    final session = await AudioSession.instance;
+    session.interruptionEventStream.listen((event) async {
+      if (event.begin) {
+        if (event.type == AudioInterruptionType.pause ||
+            event.type == AudioInterruptionType.unknown) {
+          await _player.pause();
+        }
+      } else {
+        switch (event.type) {
+          case AudioInterruptionType.pause:
+          case AudioInterruptionType.unknown:
+            // Interruption ended and we were playing before it started:
+            // reactivate the session and resume.
+            if (playbackState.value.playing == false && _shouldResumeAfterInterruption) {
+              await session.setActive(true);
+              await _player.play();
+            }
+            break;
+          case AudioInterruptionType.duck:
+            break;
+        }
+      }
+    });
+  }
+
+  bool _shouldResumeAfterInterruption = false;
 
   @override
   Future<void> play() => _player.play();
 
   @override
-  Future<void> pause() => _player.pause();
+  Future<void> pause() {
+    _shouldResumeAfterInterruption = false;
+    return _player.pause();
+  }
 
   @override
-  Future<void> stop() => _player.stop();
+  Future<void> stop() {
+    _shouldResumeAfterInterruption = false;
+    return _player.stop();
+  }
 
   @override
   Future<void> seek(Duration position) => _player.seek(position);
@@ -36,6 +78,13 @@ class MyAudioHandler extends BaseAudioHandler {
   @override
   Future<void> playFromUri(Uri uri, [Map<String, dynamic>? extras]) async {
     try {
+      _shouldResumeAfterInterruption = true;
+      // Force-reactivate the audio session every time Play is pressed.
+      // On iOS, if the session went inactive (interruption, or the OS
+      // reclaiming it after a long background period), just_audio can
+      // otherwise report "playing" with no actual sound.
+      final session = await AudioSession.instance;
+      await session.setActive(true);
       final headers = extras?['headers'] as Map<String, String>? ?? {};
       await _player.setAudioSource(AudioSource.uri(uri, headers: headers));
       return play();

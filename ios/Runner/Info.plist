@@ -81,8 +81,6 @@
 				</array>
 			</dict>
 		</array>
-		<key>NSUserTrackingUsageDescription</key>
-		<string>Mara FM menggunakan informasi ini untuk memberikan notifikasi yang relevan tentang program dan konten radio.</string>
 		<key>NSAppleMusicUsageDescription</key>
 		<string>Mara FM memerlukan akses ini untuk memutar audio radio di perangkat Anda.</string>
 		<key>ITSAppUsesNonExemptEncryption</key>

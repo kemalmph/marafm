@@ -3,12 +3,14 @@ class StationMetadata {
   final String artist;
   final String artUrl;
   final List<HistoryItem> history;
+  final bool isOnline;
 
   StationMetadata({
     required this.title,
     required this.artist,
     required this.artUrl,
     required this.history,
+    this.isOnline = true,
   });
 
   factory StationMetadata.fromJson(Map<String, dynamic> json) {
@@ -16,9 +18,12 @@ class StationMetadata {
     String artist = 'Unknown Artist';
     String artUrl = '';
     List<HistoryItem> history = [];
+    bool isOnline = true;
 
     if (json.containsKey('now_playing')) {
-      // Mara FM format
+      // Mara FM format. AzuraCast keeps reporting the last song after the
+      // encoder disconnects, so is_online is the only reliable off-air signal.
+      isOnline = json['is_online'] != false;
       final nowPlaying = json['now_playing'];
       final song = nowPlaying['song'];
       title = song['title'] ?? title;
@@ -53,6 +58,7 @@ class StationMetadata {
       artist: artist,
       artUrl: artUrl,
       history: history,
+      isOnline: isOnline,
     );
   }
 }

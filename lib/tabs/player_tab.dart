@@ -39,6 +39,10 @@ class _PlayerTabState extends State<PlayerTab> {
 
   void _toggleLike(StationMetadata? metadata) async {
     if (metadata == null) return;
+    if (!metadata.isOnline) {
+      _showSnackBar('STATION IS OFF AIR');
+      return;
+    }
     if (context.read<AuthBloc>().state is! AuthAuthenticated) {
       _showSnackBar('LOGIN TO LIKE A SONG');
       return;
@@ -401,7 +405,10 @@ class _PlayerTabState extends State<PlayerTab> {
     String mainText;
     String subText;
 
-    if (isPlaying) {
+    if (state.metadata?.isOnline == false) {
+      mainText = 'STREAMING OFF';
+      subText = '${state.currentChannel.name.toUpperCase()} IS OFF AIR';
+    } else if (isPlaying) {
       if (hasMetadata && title != null && title.isNotEmpty) {
         mainText = title.toUpperCase();
         subText = (artist ?? '').toUpperCase();

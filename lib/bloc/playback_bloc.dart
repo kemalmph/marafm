@@ -287,13 +287,21 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
 
       emit(state.copyWith(metadata: metadata));
 
-      _audioHandler.updateMetadata(audio.MediaItem(
-        id: state.currentChannel.streamUrl,
-        album: currentChannel.name,
-        title: metadata.title,
-        artist: metadata.artist,
-        artUri: kIsWeb ? null : (metadata.artUrl.isNotEmpty ? Uri.parse(metadata.artUrl) : Uri.parse('https://marafm.com/logo.png')), 
-      ));
+      _audioHandler.updateMetadata(metadata.isOnline
+          ? audio.MediaItem(
+              id: state.currentChannel.streamUrl,
+              album: currentChannel.name,
+              title: metadata.title,
+              artist: metadata.artist,
+              artUri: kIsWeb ? null : (metadata.artUrl.isNotEmpty ? Uri.parse(metadata.artUrl) : Uri.parse('https://marafm.com/logo.png')),
+            )
+          : audio.MediaItem(
+              id: state.currentChannel.streamUrl,
+              album: currentChannel.name,
+              title: 'Streaming off',
+              artist: currentChannel.name,
+              artUri: kIsWeb ? null : Uri.parse('https://marafm.com/logo.png'),
+            ));
     } catch (e) {
       // Log or handle error
     }

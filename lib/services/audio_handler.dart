@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
@@ -18,9 +19,31 @@ class MyAudioHandler extends BaseAudioHandler {
 
   Stream<IcyMetadata?> get icyMetadataStream => _player.icyMetadataStream;
 
+  static const _loadTimeout = Duration(seconds: 20);
+
+  // Bumped by pause/stop and each new load, so a load that finishes after the user
+  // paused or switched channel does not start playing.
+  int _loadGeneration = 0;
+
   MyAudioHandler() {
-    _player.playbackEventStream.map(_transformEvent).pipe(playbackState);
+    _player.playbackEventStream.listen(
+      (event) => playbackState.add(_transformEvent(event)),
+      // A dropped stream leaves just_audio "playing" with nothing loaded, which shows
+      // as playing but silent. Stop so the UI falls back to the Play state.
+      onError: (Object e, StackTrace _) => _fail(e),
+    );
     _listenForInterruptions();
+  }
+
+  Future<void> _fail(Object e) async {
+    _loadGeneration++;
+    _shouldResumeAfterInterruption = false;
+    await _player.stop();
+    playbackState.add(playbackState.value.copyWith(
+      processingState: AudioProcessingState.error,
+      playing: false,
+      errorMessage: e.toString(),
+    ));
   }
 
   // Reactivate/resume playback when an iOS/Android audio interruption ends
@@ -69,12 +92,14 @@ class MyAudioHandler extends BaseAudioHandler {
 
   @override
   Future<void> pause() {
+    _loadGeneration++;
     _shouldResumeAfterInterruption = false;
     return _player.pause();
   }
 
   @override
   Future<void> stop() {
+    _loadGeneration++;
     _shouldResumeAfterInterruption = false;
     return _player.stop();
   }
@@ -82,20 +107,26 @@ class MyAudioHandler extends BaseAudioHandler {
   @override
   Future<void> seek(Duration position) => _player.seek(position);
 
+  /// Loads [uri] and starts playback. Returns once the stream is loaded and playback
+  /// has started, or false if a pause, stop or newer load superseded this one.
   @override
-  Future<void> playFromUri(Uri uri, [Map<String, dynamic>? extras]) async {
+  Future<bool> playFromUri(Uri uri, [Map<String, dynamic>? extras]) async {
+    final generation = ++_loadGeneration;
+    final headers = extras?['headers'] as Map<String, String>? ?? {};
     try {
-      final headers = extras?['headers'] as Map<String, String>? ?? {};
-      await _player.setAudioSource(AudioSource.uri(uri, headers: headers));
-      return play();
+      await _player
+          .setAudioSource(AudioSource.uri(uri, headers: headers))
+          .timeout(_loadTimeout);
+    } on PlayerInterruptedException {
+      return false;
     } catch (e) {
-      // Broadcast error through playback state
-      playbackState.add(playbackState.value.copyWith(
-        processingState: AudioProcessingState.error,
-        errorMessage: e.toString(),
-      ));
+      if (generation == _loadGeneration) await _fail(e);
       rethrow;
     }
+    if (generation != _loadGeneration) return false;
+    // just_audio's play() future only completes when playback later pauses or stops.
+    unawaited(play());
+    return true;
   }
 
   PlaybackState _transformEvent(PlaybackEvent event) {

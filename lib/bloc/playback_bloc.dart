@@ -93,6 +93,9 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
   Timer? _metadataTimer;
   StreamSubscription? _playerStateSubscription;
   StreamSubscription? _icyMetadataSubscription;
+  // True while a Play request is loading its stream, before the player reports playing.
+  bool _isStarting = false;
+  int _playRequestId = 0;
 
   PlaybackBloc(this._audioHandler) : super(const PlaybackState()) {
     on<PlayRequested>(_onPlay);
@@ -178,13 +181,17 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
                           event.state.processingState == audio.AudioProcessingState.loading;
       final isError = event.state.processingState == audio.AudioProcessingState.error;
       final isPlaying = event.state.playing;
-      
+      if (isError) _isStarting = false;
+
+      // While a stream loads, the player is not "playing" yet; that must read as
+      // loading, not as paused.
       emit(state.copyWith(
         isPlaying: isPlaying,
-        isPaused: !isPlaying && 
-                  event.state.processingState != audio.AudioProcessingState.idle && 
+        isPaused: !isPlaying &&
+                  !_isStarting &&
+                  event.state.processingState != audio.AudioProcessingState.idle &&
                   !isError,
-        isLoading: isPlaying && isBuffering,
+        isLoading: (isPlaying || _isStarting) && isBuffering,
       ));
     });
 
@@ -202,6 +209,8 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
 
 
   Future<void> _onPlay(PlayRequested event, Emitter<PlaybackState> emit) async {
+    final requestId = ++_playRequestId;
+    _isStarting = true;
     try {
       emit(state.copyWith(isLoading: true, isPaused: false));
       final streamUrl = state.currentChannel.streamUrl;
@@ -211,18 +220,23 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
       final headers = <String, String>{
         if (state.currentChannel.metadataUrl != null) 'Icy-MetaData': '0',
       };
-      await _audioHandler.playFromUri(Uri.parse(streamUrl), {'headers': headers});
-      
+      final started = await _audioHandler.playFromUri(Uri.parse(streamUrl), {'headers': headers});
+      if (requestId != _playRequestId) return;
+      _isStarting = false;
+      if (!started) return;
+
       emit(state.copyWith(activeStreamUrl: streamUrl));
-      
+
       // Start session tracking if not already switched
       if (!event.isSwitch) {
         ListenerSessionService.instance.startSession(state.currentChannel.name, 'radio');
       }
-      
+
       add(RefreshMetadataRequested());
     } catch (e) {
-      emit(state.copyWith(isLoading: false, isPlaying: false));
+      if (requestId != _playRequestId) return;
+      _isStarting = false;
+      emit(state.copyWith(isLoading: false, isPlaying: false, isPaused: false));
     }
   }
 
@@ -241,7 +255,9 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
       metadata: newMetadata, // Clear old metadata explicitly
     ));
 
-    if (state.isPlaying) {
+    // Also restart when mid-load, otherwise the previous channel's stream finishes
+    // loading and plays under the new channel's name.
+    if (state.isPlaying || _isStarting) {
       ListenerSessionService.instance.switchChannel(event.channel.name, 'radio');
       add(PlayRequested(isSwitch: true)); // Restart playback with new URL
     } else {
@@ -250,12 +266,16 @@ class PlaybackBloc extends Bloc<PlaybackEvent, PlaybackState> {
   }
 
   Future<void> _onPause(PauseRequested event, Emitter<PlaybackState> emit) async {
+    _playRequestId++;
+    _isStarting = false;
     await ListenerSessionService.instance.endSession();
     await _audioHandler.pause();
-    emit(state.copyWith(isPlaying: false, isPaused: true));
+    emit(state.copyWith(isPlaying: false, isPaused: true, isLoading: false));
   }
 
   Future<void> _onStop(StopRequested event, Emitter<PlaybackState> emit) async {
+    _playRequestId++;
+    _isStarting = false;
     await ListenerSessionService.instance.endSession();
     await _audioHandler.stop();
     emit(state.copyWith(isPlaying: false, isPaused: false));

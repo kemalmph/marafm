@@ -2,10 +2,16 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 
 class MyAudioHandler extends BaseAudioHandler {
   final _player = AudioPlayer(
+    // By default headers are sent through a localhost proxy server inside the app. iOS
+    // reclaims its listening socket while the app is backgrounded (phone call, long
+    // lock), after which every load fails with -1004 until the app restarts. Send the
+    // headers directly via AVURLAsset instead.
+    useProxyForRequestHeaders: false,
     audioLoadConfiguration: kIsWeb
         ? null
         : const AudioLoadConfiguration(
@@ -20,24 +26,121 @@ class MyAudioHandler extends BaseAudioHandler {
   Stream<IcyMetadata?> get icyMetadataStream => _player.icyMetadataStream;
 
   static const _loadTimeout = Duration(seconds: 20);
+  // While offline a load hangs rather than failing, so reconnect attempts use a shorter
+  // timeout and capped backoff to keep retrying for ~2.5 minutes in total.
+  static const _reconnectLoadTimeout = Duration(seconds: 10);
+  static const _maxReconnectDelay = Duration(seconds: 5);
+  static const _maxReconnectAttempts = 10;
+  static const _stallCheckInterval = Duration(seconds: 2);
+  static const _stallTimeout = Duration(seconds: 10);
+
+  Duration _lastBuffered = Duration.zero;
+  DateTime _lastProgressAt = DateTime.now();
 
   // Bumped by pause/stop and each new load, so a load that finishes after the user
   // paused or switched channel does not start playing.
   int _loadGeneration = 0;
 
+  // Last stream the user asked for, so a dropped connection can be re-opened.
+  Uri? _currentUri;
+  Map<String, String> _currentHeaders = const {};
+  int _reconnectAttempts = 0;
+  int _activeLoads = 0;
+  bool _reconnecting = false;
+
   MyAudioHandler() {
     _player.playbackEventStream.listen(
       (event) => playbackState.add(_transformEvent(event)),
-      // A dropped stream leaves just_audio "playing" with nothing loaded, which shows
-      // as playing but silent. Stop so the UI falls back to the Play state.
-      onError: (Object e, StackTrace _) => _fail(e),
+      onError: (Object e, StackTrace _) {
+        // iOS broadcasts "abort" whenever a new load replaces a pending one; that is not
+        // a dropped stream. Treating it as one killed the new load on every Play press.
+        if (e is PlatformException && e.code == 'abort') return;
+        // A failing load reports through its own future; don't handle it twice.
+        if (_activeLoads > 0) return;
+        _reconnectOrFail(e);
+      },
     );
+    // A live stream never ends on its own; "completed" means the server closed it.
+    _player.processingStateStream.listen((state) {
+      if (state == ProcessingState.completed && _wantsPlayback) {
+        _reconnectOrFail('Stream ended');
+      }
+    });
     _listenForInterruptions();
+    Timer.periodic(_stallCheckInterval, (_) => _checkForStall());
+  }
+
+  // With automaticallyWaitsToMinimizeStalling off, AVPlayer that loses its connection
+  // keeps reporting "ready, playing" and never errors, and just_audio extrapolates
+  // position from the clock, so it keeps advancing too. The buffered position comes
+  // from AVPlayer's loaded ranges, so it stops growing when no data arrives.
+  void _checkForStall() {
+    final buffered = _player.bufferedPosition;
+    final now = DateTime.now();
+    final active = _wantsPlayback && _player.playing && _activeLoads == 0 && !_reconnecting;
+    if (!active || buffered != _lastBuffered) {
+      // Only new data proves the stream recovered; a "ready, playing" event does not,
+      // since a dead stream reports exactly that.
+      if (active) _reconnectAttempts = 0;
+      _lastBuffered = buffered;
+      _lastProgressAt = now;
+      return;
+    }
+    if (now.difference(_lastProgressAt) >= _stallTimeout) {
+      _lastProgressAt = now;
+      _reconnectOrFail('Stream stalled');
+    }
+  }
+
+  // Unlike Android's ExoPlayer, iOS AVPlayer never retries a dropped live stream (weak
+  // signal, Wi-Fi/cellular handover, server closing a long-lived connection), so
+  // reconnect with backoff before giving up.
+  Future<void> _reconnectOrFail(Object error) async {
+    final uri = _currentUri;
+    if (!_wantsPlayback || uri == null || _reconnectAttempts >= _maxReconnectAttempts) {
+      await _fail(error);
+      return;
+    }
+    final backoff = Duration(seconds: 1 << _reconnectAttempts.clamp(0, 3));
+    final delay = backoff > _maxReconnectDelay ? _maxReconnectDelay : backoff;
+    _reconnectAttempts++;
+    _reconnecting = true;
+    final generation = ++_loadGeneration;
+    playbackState.add(playbackState.value.copyWith(
+      processingState: AudioProcessingState.buffering,
+      playing: true,
+    ));
+    await Future.delayed(delay);
+    if (generation != _loadGeneration) return;
+    // Setting playing first keeps the player "playing" through the reload, so the UI
+    // shows loading rather than paused; playback resumes once the source is ready.
+    unawaited(_player.play());
+    try {
+      await _load(uri, _currentHeaders, timeout: _reconnectLoadTimeout);
+      if (generation == _loadGeneration) _reconnecting = false;
+    } on PlayerInterruptedException {
+      return;
+    } catch (e) {
+      if (generation == _loadGeneration) await _reconnectOrFail(e);
+    }
+  }
+
+  Future<void> _load(Uri uri, Map<String, String> headers,
+      {Duration timeout = _loadTimeout}) async {
+    _activeLoads++;
+    try {
+      await _player
+          .setAudioSource(AudioSource.uri(uri, headers: headers.isEmpty ? null : headers))
+          .timeout(timeout);
+    } finally {
+      _activeLoads--;
+    }
   }
 
   Future<void> _fail(Object e) async {
     _loadGeneration++;
-    _shouldResumeAfterInterruption = false;
+    _wantsPlayback = false;
+    _reconnecting = false;
     await _player.stop();
     playbackState.add(playbackState.value.copyWith(
       processingState: AudioProcessingState.error,
@@ -66,7 +169,7 @@ class MyAudioHandler extends BaseAudioHandler {
           case AudioInterruptionType.unknown:
             // Interruption ended and we were playing before it started:
             // reactivate the session and resume.
-            if (playbackState.value.playing == false && _shouldResumeAfterInterruption) {
+            if (playbackState.value.playing == false && _wantsPlayback) {
               await session.setActive(true);
               await _player.play();
             }
@@ -78,13 +181,15 @@ class MyAudioHandler extends BaseAudioHandler {
     });
   }
 
-  bool _shouldResumeAfterInterruption = false;
+  // True while the user wants audio: drives auto-resume after interruptions and
+  // reconnecting after stream drops.
+  bool _wantsPlayback = false;
 
   // Every play path (app button, lock screen, headphones) must re-arm auto-resume and
   // reactivate the session, since iOS may have deactivated it while idle or interrupted.
   @override
   Future<void> play() async {
-    _shouldResumeAfterInterruption = true;
+    _wantsPlayback = true;
     final session = await AudioSession.instance;
     await session.setActive(true);
     await _player.play();
@@ -93,14 +198,16 @@ class MyAudioHandler extends BaseAudioHandler {
   @override
   Future<void> pause() {
     _loadGeneration++;
-    _shouldResumeAfterInterruption = false;
+    _wantsPlayback = false;
+    _reconnecting = false;
     return _player.pause();
   }
 
   @override
   Future<void> stop() {
     _loadGeneration++;
-    _shouldResumeAfterInterruption = false;
+    _wantsPlayback = false;
+    _reconnecting = false;
     return _player.stop();
   }
 
@@ -113,10 +220,12 @@ class MyAudioHandler extends BaseAudioHandler {
   Future<bool> playFromUri(Uri uri, [Map<String, dynamic>? extras]) async {
     final generation = ++_loadGeneration;
     final headers = extras?['headers'] as Map<String, String>? ?? {};
+    _currentUri = uri;
+    _currentHeaders = headers;
+    _reconnectAttempts = 0;
+    _reconnecting = false;
     try {
-      await _player
-          .setAudioSource(AudioSource.uri(uri, headers: headers))
-          .timeout(_loadTimeout);
+      await _load(uri, headers);
     } on PlayerInterruptedException {
       return false;
     } catch (e) {
@@ -125,7 +234,7 @@ class MyAudioHandler extends BaseAudioHandler {
     }
     if (generation != _loadGeneration) return false;
     // just_audio's play() future only completes when playback later pauses or stops.
-    unawaited(play());
+    unawaited(play().catchError((Object e) => debugPrint('play() failed: $e')));
     return true;
   }
 
